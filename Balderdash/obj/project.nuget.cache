@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "8TV8/RhucF4A/b11ioRUYEinFixDIz4rP81SPA43mL5oUb9elcBI3s1MlCB/cN9paD35nhxKiYUJ3gny0EL67w==",
+  "success": true,
+  "projectFilePath": "/home/bryton/RiderProjects/Balderdash/Balderdash/Balderdash.csproj",
+  "expectedPackageFiles": [
+    "/home/bryton/.nuget/packages/microsoft.typescript.msbuild/4.5.3/microsoft.typescript.msbuild.4.5.3.nupkg.sha512"
+  ],
+  "logs": []
+}
