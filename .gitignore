@@ -1,6 +1,6 @@
 # Project exclude paths
 /Balderdash/node_modules/
-/Balderdash/wwwroot/
 /Balderdash/bin/
-/Balderdash/obj
+/Balderdash/obj/
+/Balderdash/wwwroot/
 .vs/
