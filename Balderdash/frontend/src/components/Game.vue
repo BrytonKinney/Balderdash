@@ -4,16 +4,9 @@
     </div>
 </template>
 <script lang="ts">
-    import Vue from 'vue';
     import { Game } from "../game/Game";
+    import Vue from "vue";
     export default Vue.extend({
-        name: "App",
-        data: function () {
-            return {
-                playerName: '' as string,
-                currentGame: new Game()
-            };
-        }
-    });
 
+    });
 </script>

@@ -5,9 +5,16 @@ module.exports = {
     outputDir: path.resolve(__dirname, "wwwroot"),
     indexPath: path.resolve(__dirname, "wwwroot", "index.html"),
     configureWebpack: {
-        entry: "./frontend/src/index.ts",
+        entry: {
+            app: "./frontend/src/main.ts"
+        },
         resolve: {
-            extensions: [".js", ".ts", ".vue"]
+            extensions: [".vue", ".js", ".ts"]
+        },
+        module: {
+            rules: [
+                { test: /\.vue$/, loader: "vue-loader" }
+            ]
         }
     },
     chainWebpack: config => {

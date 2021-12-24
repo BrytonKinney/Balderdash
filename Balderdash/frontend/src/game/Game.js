@@ -1,14 +1,12 @@
 import { Player } from "./Player";
 import * as signalr from "@microsoft/signalr";
-
 class Game {
-    _players: Player[];
-    _currentPlayer: Player;
-    _connection: signalr.HubConnection;
-    _canStart: boolean;
-
+    _players;
+    _currentPlayer;
+    _connection;
+    _canStart;
     constructor() {
-        this._players = new Array<Player>();
+        this._players = new Array();
         this._currentPlayer = new Player("", "", true);
         this._connection = new signalr.HubConnectionBuilder().withUrl("/game").build();
         this._canStart = false;
@@ -19,12 +17,11 @@ class Game {
         });
         this._connection.start().then(() => { return this._canStart = true; });
     }
-
-    async startGame() : Promise<void> {
+    async startGame() {
         await this._connection.send("startGame", this._currentPlayer).then((resp) => {
             console.log(resp);
         });
     }
 }
-
 export { Game };
+//# sourceMappingURL=Game.js.map

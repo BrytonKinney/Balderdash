@@ -14,6 +14,11 @@
     "types": [
       "webpack-env"
     ],
+    "paths": {
+      "@/*": [
+        "frontend/src/*"
+      ]
+    },
     "lib": [
       "esnext",
       "dom",
@@ -22,11 +27,11 @@
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "frontend/src/**/*.ts",
+    "frontend/src/**/*.tsx",
+    "frontend/src/**/*.vue",
+    "frontend/tests/**/*.ts",
+    "frontend/tests/**/*.tsx"
   ],
   "exclude": [
     "node_modules"
