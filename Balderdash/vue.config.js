@@ -8,16 +8,6 @@ module.exports = {
         entry: "./frontend/src/index.ts",
         resolve: {
             extensions: [".js", ".ts", ".vue"]
-        },
-        module: {
-            rules: [
-                { test: /\.vue$/, loader: "vue-loader" },
-                //{
-                //    test: /\.ts$/,
-                //    loader: "ts-loader",
-                //    options: { appendTsSuffixTo: [/\.vue$/] }
-                //}
-            ]
         }
     },
     chainWebpack: config => {
