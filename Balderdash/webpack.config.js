@@ -1,5 +1,8 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require("./node_modules/html-webpack-plugin/typings");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
 module.exports = {
     entry: "./frontend/src/index.ts",
     output: {
@@ -23,8 +26,12 @@ module.exports = {
         ]
     },
     plugins: [
+        new HtmlWebpackPlugin({
+            template: "./frontend/src/pages/index.html"
+        }),
         new MiniCssExtractPlugin({
             filename: "css/[name].css"
-        })
+        }),
+        new CleanWebpackPlugin()
     ]
 };
