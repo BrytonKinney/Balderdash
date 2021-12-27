@@ -11,8 +11,18 @@ module.exports = {
         });
     },
     devServer: {
-        target: 'https://localhost:44342',
-        ws: true,
-        ssl: true
+        https: true,
+        publicPath: '/',
+        contentBase: path.resolve(__dirname, "wwwroot"),
+        hot: true,
+        proxy: {
+            "": {
+                target: 'https://localhost:44342',
+                ws: true,
+                changeOrigin: true,
+                hostRewrite: true
+            }
+        },
+        public: "https://localhost:8080"
     }
 }

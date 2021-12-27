@@ -15,7 +15,14 @@ namespace Balderdash.Hubs
 
         public async Task StartGame(Player playerOne)
         {
-            await Clients.All.SendAsync("gameStarted", _gameService.StartNewGame(playerOne), CancellationToken.None);
+            var newGame = _gameService.StartNewGame(playerOne, Context);
+            await Clients.Caller.SendAsync("gameStarted", newGame, CancellationToken.None);
+        }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            _gameService.HandleDisconnect(Context);
+            return base.OnDisconnectedAsync(exception);
         }
     }
 }

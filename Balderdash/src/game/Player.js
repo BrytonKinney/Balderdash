@@ -1,26 +1,17 @@
 class Player {
-    _id;
-    _name;
-    _isHost;
+    id;
+    name;
+    isHost;
     constructor(id, name, isHost) {
-        this._id = id;
-        this._name = name;
-        this._isHost = isHost;
+        this.id = id;
+        this.name = name;
+        this.isHost = isHost;
     }
-    get Id() {
-        return this._id;
+    setName(name) {
+        this.name = name;
     }
-    set Id(value) {
-        this._id = value;
-    }
-    get Name() {
-        return this._name;
-    }
-    set Name(value) {
-        this._name = value;
-    }
-    get IsHost() {
-        return this._isHost;
+    setId(id) {
+        this.id = id;
     }
 }
 export { Player };

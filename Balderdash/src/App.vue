@@ -1,69 +1,108 @@
 ﻿<template>
     <div id="app">
-        <div class="game-options">
-            <button type="button" v-on:click="setGameOptionSelection(GameOption.JoinGame)">Join a game</button>
-            <button type="button" v-on:click="setGameOptionSelection(GameOption.StartGame)">Start new game</button>
+        <div class="game-options" v-if="!gameSelected">
+            <div class="game-options">
+                <button class="primary" type="button" v-on:click="setGameOptionSelection(GameOption.JoinGame)">Join a game</button>
+                <button class="primary" type="button" v-on:click="setGameOptionSelection(GameOption.StartGame)">Start new game</button>
+            </div>
+            <div v-if="gameOptionSelection === GameOption.JoinGame" id="joinGame" class="game-options">
+                <input type="text" placeholder="Game ID" v-model="joinGameId" />
+                <input id="name" type="text" placeholder="Name" v-model="playerName" />
+            </div>
+            <div v-if="gameOptionSelection === GameOption.StartGame" id="startGame" class="game-options">
+                <input id="name" type="text" placeholder="Name" v-model="playerName" />
+            </div>
+            <div v-if="gameOptionSelection !== GameOption.None" class="game-options">
+                <button type="button" v-on:click="joinOrStartGame">Go</button>
+            </div>
         </div>
-        <div id="joinGame" class="game-options">
-            <input type="text" placeholder="Game ID" v-model="joinGameId" />
-            <input type="text" placeholder="Name" v-model="playerName" />
-        </div>
-        <div id="startGame" class="game-options">
-            <input type="text" placeholder="Name" v-model="playerName" />
-        </div>
-        <ActiveGame v-bind:newGame="game" />
+        <ActiveGame v-if="gameSelected" v-bind:newGame="game" />
     </div>
 </template>
 <script lang="ts">
     import Vue from "vue";
     import ActiveGame from "./components/ActiveGame.vue";
-    import { Game } from "./game/Balderdash";
-    enum GameOption {
-        None = 0,
-        JoinGame,
-        StartGame
-    };
+    import { Game, GameOption } from "./game/Balderdash";
     export default Vue.extend({
         name: "App",
         components: {
             ActiveGame
         },
+        computed: {
+            GameOption: function () {
+                return GameOption;
+            },
+        },
         data: function () {
             return {
-                GameOption,
                 gameOptionSelection: GameOption.None as GameOption,
                 playerName: "" as string,
                 joinGameId: "" as string,
-                game: new Game()
+                game: new Game(),
+                gameSelected: false
             };
         },
         methods: {
             setGameOptionSelection(gameOption: GameOption): void {
                 this.gameOptionSelection = gameOption;
+            },
+            joinOrStartGame(): void {
+                if (!this.validateName())
+                    return;
+                if (!this.game.CanStart)
+                    return;
+                this.gameOptionSelection === GameOption.StartGame ? this.startGame() : this.joinGame();
+            },
+            joinGame(): void {
+            },
+            async startGame(): Promise<void> {
+                this.gameSelected = true;
+                this.game.CurrentPlayer.setName(this.playerName);
+                this.game.Players.push(this.game.CurrentPlayer);
+                await this.game.startGame();
+            },
+            validateName(): boolean {
+                const nameInput = document.querySelector('input#name');
+                if (this.playerName.length < 1) {
+                    nameInput?.classList.add('invalid');
+                    return false;
+                }
+                nameInput?.classList.remove('invalid');
+                return true;
             }
         }
     });
 </script>
-<style>
+<style lang="scss">
+    @import "./styles/site.scss";
+
     #app {
         display: flex;
         flex-wrap: wrap;
-        margin-top: 1em;
+        margin-top: 1em;        
     }
 
-        #app div.game-options {
-            display: flex;
-            width: 50%;
-            padding: 1em 25% 1em 25%;
-        }
+    div.game-options {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        padding: 1em 25% 1em 25%;
+        gap: 5px;
+    }
+    div.game-options button, div.game-options input, div.game-options select {
+        font-size: 1.1rem;
+    }
+    div.game-options button {
+        padding-top: .5em;
+        padding-bottom: .5em;
+    }
 
     div.game-options input {
         flex: 2;
     }
 
     div.game-options button {
-        flex: 2;
-        flex-wrap: wrap;
+        flex: 2;        
         width: 100%;
     }
 </style>

@@ -1,5 +1,5 @@
-﻿import { Game } from "./Game";
+﻿import { Game, GameOption } from "./Game";
 import { Player } from "./Player";
 import { StartGameResponse } from "./Responses";
 
-export { Game, Player, StartGameResponse };
+export { Game, Player, StartGameResponse, GameOption };
