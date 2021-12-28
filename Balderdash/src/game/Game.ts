@@ -1,5 +1,4 @@
 import { Player } from "./Player";
-import * as signalr from "@microsoft/signalr";
 import { GameConnection } from "./GameConnection";
 
 enum GameOption {
@@ -11,17 +10,12 @@ enum GameOption {
 class Game {
     private _players: Player[];
     private _currentPlayer: Player;
-    
-    private _canStart: boolean;
-    private _gameId: string;
     private _gameConnection: GameConnection;
 
     constructor() {
         this._players = new Array<Player>();
         this._currentPlayer = new Player("", "", true);
-        this._gameConnection = new GameConnection();
-        this._canStart = false;
-        this._gameId = "";        
+        this._gameConnection = new GameConnection(); 
     }
 
     async startGame() : Promise<void> {
@@ -29,7 +23,7 @@ class Game {
     }
 
     get CanStart() {
-        return this._canStart;
+        return this._gameConnection.IsConnectionStarted;
     }
     get Players() {
         return this._players;

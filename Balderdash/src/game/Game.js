@@ -1,5 +1,5 @@
 import { Player } from "./Player";
-import * as signalr from "@microsoft/signalr";
+import { GameConnection } from "./GameConnection";
 var GameOption;
 (function (GameOption) {
     GameOption[GameOption["None"] = 0] = "None";
@@ -10,30 +10,17 @@ var GameOption;
 class Game {
     _players;
     _currentPlayer;
-    _connection;
-    _canStart;
-    _gameId;
+    _gameConnection;
     constructor() {
         this._players = new Array();
         this._currentPlayer = new Player("", "", true);
-        this._connection = new signalr.HubConnectionBuilder().withUrl("/game").build();
-        this._canStart = false;
-        this._gameId = "";
-        this._connection.on("gameStarted", (response) => {
-            if (this._connection.connectionId != null) {
-                this._currentPlayer.setId(this._connection.connectionId);
-            }
-            this._gameId = response.gameId;
-        });
-        this._connection.start().then(() => { return this._canStart = true; });
+        this._gameConnection = new GameConnection();
     }
     async startGame() {
-        await this._connection.send("startGame", this._currentPlayer).then((resp) => {
-            console.log(resp);
-        });
+        await this._gameConnection.startGame(this._currentPlayer);
     }
     get CanStart() {
-        return this._canStart;
+        return this._gameConnection.IsConnectionStarted;
     }
     get Players() {
         return this._players;
