@@ -5,4 +5,4 @@
 /Balderdash/wwwroot/
 .vs/
 *.js.map
-*.js
+/Balderdash/src/**/*.js
