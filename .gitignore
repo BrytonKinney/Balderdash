@@ -4,3 +4,5 @@
 /Balderdash/obj/
 /Balderdash/wwwroot/
 .vs/
+*.js.map
+*.js
