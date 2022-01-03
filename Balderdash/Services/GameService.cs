@@ -11,7 +11,7 @@ namespace Balderdash.Services
 {
     public class GameService
     {
-        private static ConcurrentDictionary<string, Game> _currentGames = new ConcurrentDictionary<string, Game>();
+        private static readonly ConcurrentDictionary<Guid, Game> _currentGames = new ConcurrentDictionary<Guid, Game>();
         public StartGameResponse StartNewGame(Player playerOne)
         {
             var newGame = new Game();
@@ -19,8 +19,17 @@ namespace Balderdash.Services
             return new StartGameResponse()
             {
                 GameId = newGame.GameId,
-                StartedSuccessfully = _currentGames.TryAdd(newGame.GameId, newGame)
+                StartedSuccessfully = _currentGames.TryAdd(Guid.Parse(newGame.GameId), newGame)
             };
+        }
+
+        public void JoinGame(string gameId, Player player)
+        {
+            if (!Guid.TryParse(gameId, out Guid gameGuid))
+                return;
+            if (!_currentGames.TryGetValue(gameGuid, out Game currentGame))
+                return;
+            currentGame.Players.Add(player);
         }
     }
 }

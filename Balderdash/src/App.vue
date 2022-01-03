@@ -7,10 +7,10 @@
             </div>
             <div v-if="gameOptionSelection === GameOption.JoinGame" id="joinGame" class="game-options">
                 <input type="text" placeholder="Game ID" v-model="joinGameId" />
-                <input id="name" type="text" placeholder="Name" v-model="playerName" />
+                <input ref="name" type="text" placeholder="Name" v-model="playerName" />
             </div>
             <div v-if="gameOptionSelection === GameOption.StartGame" id="startGame" class="game-options">
-                <input id="name" type="text" placeholder="Name" v-model="playerName" />
+                <input ref="name" type="text" placeholder="Name" v-model="playerName" />
             </div>
             <div v-if="gameOptionSelection !== GameOption.None" class="game-options">
                 <button type="button" v-on:click="joinOrStartGame">Go</button>
@@ -62,12 +62,12 @@
                 await this.game.startGame();
             },
             validateName(): boolean {
-                const nameInput = document.querySelector('input#name');
+                const nameInput = this.$refs.name as HTMLElement;
                 if (this.playerName.length < 1) {
-                    nameInput?.classList.add('invalid');
+                    nameInput.classList.add('invalid');
                     return false;
                 }
-                nameInput?.classList.remove('invalid');
+                nameInput.classList.remove('invalid');
                 return true;
             }
         }

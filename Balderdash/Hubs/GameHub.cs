@@ -11,7 +11,12 @@ namespace Balderdash.Hubs
 {
     public class GameHub : Hub
     {
-        private static GameService _gameService = new GameService();
+        private GameService _gameService;
+
+        public GameHub(GameService gameService)
+        {
+            _gameService = gameService;
+        }
 
         public async Task StartGame(Player playerOne)
         {

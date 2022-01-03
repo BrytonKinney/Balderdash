@@ -6,11 +6,11 @@ enum GameOption {
     None = 0,
     JoinGame,
     StartGame
-};
+}
 
 class Game {
-    private _players: Player[];
-    private _currentPlayer: Player;
+    private readonly _players: Player[];
+    private readonly _currentPlayer: Player;
     private _gameConnection: GameConnection;
 
     constructor() {

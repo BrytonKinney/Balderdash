@@ -2,7 +2,7 @@
 /Balderdash/node_modules/
 /Balderdash/bin/
 /Balderdash/obj/
-/Balderdash/wwwroot/
+/Balderdash/wwwroot/*
 .vs/
 *.js.map
-/Balderdash/src/**/*.js
+/Balderdash/src/*.js

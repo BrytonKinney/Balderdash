@@ -16,6 +16,6 @@ namespace Balderdash.Entities
         }
 
         public string GameId => _gameId;
-        public IList<Player> Players { get; private set; }
+        public IList<Player> Players { get; }
     }
 }

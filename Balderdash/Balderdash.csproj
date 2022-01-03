@@ -18,6 +18,13 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
     </ItemGroup>
+
+    <ItemGroup>
+      <TypeScriptCompile Include="src\game\Events\GameStartedEvent.ts" />
+      <TypeScriptCompile Include="src\game\GameEvent.ts" />
+      <TypeScriptCompile Include="src\util\ReactiveMap.ts" />
+      <TypeScriptCompile Remove="src\util\ReactiveMap.ts" />
+    </ItemGroup>
     <Target Name="NpmRunBuild" BeforeTargets="BeforeBuild">
       <Exec Command="npm run build" />
     </Target>

@@ -1,6 +1,7 @@
 ﻿<template>
     <div class="active-game">
-        <PlayerList v-bind:players="players" v-bind:current-player="currentPlayer"/>
+        <PlayerList v-bind:players="players" 
+					v-bind:current-player="currentPlayer"/>
         <div></div>
     </div>
 </template>
