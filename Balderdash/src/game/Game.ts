@@ -1,6 +1,7 @@
 import { Player } from "./Player";
 import { GameConnection } from "./GameConnection";
 import { GameStartedEvent } from "./Events/GameStartedEvent";
+import { GameJoinedResponse } from "./Responses";
 
 enum GameOption {
     None = 0,
@@ -9,7 +10,7 @@ enum GameOption {
 }
 
 class Game {
-    private readonly _players: Player[];
+    private _players: Player[];
     private readonly _currentPlayer: Player;
     private _gameConnection: GameConnection;
 
@@ -22,12 +23,31 @@ class Game {
                 this._currentPlayer.setId(data.ConnectionId);
             }
         });
+        this._gameConnection.OnPlayerJoined.on((player?: Player): void => {
+            if(player !== undefined)
+                this._players.push(player);
+        });
+        this._gameConnection.OnGameJoined.on((data?: GameJoinedResponse) => {
+            if (data !== undefined) {
+                this._currentPlayer.setId(data.playerId);
+                this._players.splice(0, this._players.length);
+                for (const player of data.players) {
+                    this._players.push(player);
+                }
+            }
+        });
     }
 
     async startGame() : Promise<void> {
         await this._gameConnection.startGame(this._currentPlayer);
     }
+    async joinGame(gameId: string) : Promise<void> {
+        await this._gameConnection.joinGame(gameId, this._currentPlayer);
+    }
 
+    get GameId() {
+        return this._gameConnection.GroupId;
+    }
     get CanStart() {
         return this._gameConnection.IsConnectionStarted;
     }

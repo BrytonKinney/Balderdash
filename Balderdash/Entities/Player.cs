@@ -17,5 +17,10 @@ namespace Balderdash.Entities
         public string Name { get; private set; }
         public string Id { get; private set; }
         public bool IsHost { get; }
+
+        public void SetId(string id)
+        {
+            Id = id;
+        }
     }
 }

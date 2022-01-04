@@ -1,4 +1,6 @@
-﻿class StartGameResponse {
+﻿import { Player } from "./Player";
+
+class StartGameResponse {
     gameId: string;
     startedSuccessfully: boolean;
 
@@ -8,4 +10,10 @@
     }
 }
 
-export { StartGameResponse };
+class GameJoinedResponse {
+    public gameId: string = "";
+    public playerId: string = "";
+    public players: Array<Player> = [];
+}
+
+export { StartGameResponse, GameJoinedResponse };

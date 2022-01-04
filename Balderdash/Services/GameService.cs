@@ -23,13 +23,13 @@ namespace Balderdash.Services
             };
         }
 
-        public void JoinGame(string gameId, Player player)
+        public Game JoinGame(string playerId, string gameId, Player player)
         {
-            if (!Guid.TryParse(gameId, out Guid gameGuid))
-                return;
-            if (!_currentGames.TryGetValue(gameGuid, out Game currentGame))
-                return;
+            if (!Guid.TryParse(gameId, out Guid gameGuid) || !_currentGames.TryGetValue(gameGuid, out Game currentGame))
+                return null;
+            player.SetId(playerId);
             currentGame.Players.Add(player);
+            return currentGame;
         }
     }
 }

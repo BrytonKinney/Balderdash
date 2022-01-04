@@ -47,13 +47,15 @@
                 this.gameOptionSelection = gameOption;
             },
             joinOrStartGame(): void {
-                if (!this.validateName())
-                    return;
-                if (!this.game.CanStart)
+                if (!this.validateName() || !this.game.CanStart)
                     return;
                 this.gameOptionSelection === GameOption.StartGame ? this.startGame() : this.joinGame();
             },
-            joinGame(): void {
+            async joinGame(): Promise<void> {
+                this.gameSelected = true;
+                this.game.CurrentPlayer.setName(this.playerName);
+                this.game.Players.push(this.game.CurrentPlayer);
+                await this.game.joinGame(this.joinGameId);
             },
             async startGame(): Promise<void> {
                 this.gameSelected = true;
