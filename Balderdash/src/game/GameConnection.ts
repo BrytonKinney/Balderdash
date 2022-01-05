@@ -5,23 +5,22 @@ import { GameEvent } from "./GameEvent";
 import { GameStartedEvent } from "./Events/GameStartedEvent";
 
 class GameConnection {
-    private _connection: signalr.HubConnection;
-
-    public ConnectionId: string;
-    public GroupId: string;
     public readonly OnGameStarted: GameEvent<GameStartedEvent>;
-    public readonly OnPlayerJoined: GameEvent<Player>;
+    public readonly OnPlayerListUpdated: GameEvent<Player[]>;
     public readonly OnGameJoined: GameEvent<GameJoinedResponse>;
 
+    private _connection: signalr.HubConnection;
     private _isConnectionStarted: boolean;
+    private _connectionId: string;
+    private _groupId: string;
 
     constructor() {
         this._connection = new signalr.HubConnectionBuilder().withUrl("/game").build();
-        this.ConnectionId = "";
-        this.GroupId = "";
+        this._connectionId = "";
+        this._groupId = "";
         this._isConnectionStarted = false;
         this.OnGameStarted = new GameEvent<GameStartedEvent>();
-        this.OnPlayerJoined = new GameEvent<Player>();
+        this.OnPlayerListUpdated = new GameEvent<Player[]>();
         this.OnGameJoined = new GameEvent<GameJoinedResponse>();
         this.registerEvents();
         this._connection.start().then(() => { return this._isConnectionStarted = true; });
@@ -30,22 +29,31 @@ class GameConnection {
     private registerEvents() : void {
         this._connection.on("gameStarted", (response: StartGameResponse) => {
             if (this._connection.connectionId != null) {
-                this.ConnectionId = this._connection.connectionId;
+                this._connectionId = this._connection.connectionId;
             }
-            this.GroupId = response.gameId;
-            this.OnGameStarted.trigger(new GameStartedEvent(this.GroupId, this.ConnectionId));
+            this._groupId = response.gameId;
+            this.OnGameStarted.trigger(new GameStartedEvent(this._groupId, this._connectionId));
         });
-        this._connection.on("playerJoined", (response: Player) => {
-            this.OnPlayerJoined.trigger(response);
+        this._connection.on("playerListUpdated", (response: Player[]) => {
+            this.OnPlayerListUpdated.trigger(response);
         });
         this._connection.on("gameJoined", (response: GameJoinedResponse) => {
             if (this._connection.connectionId != null) {
-                this.ConnectionId = this._connection.connectionId;
+                this._connectionId = this._connection.connectionId;
             }
-            this.GroupId = response.gameId;
+            this._groupId = response.gameId;
             this.OnGameJoined.trigger(response);
         });
     }
+
+    public get ConnectionId() {
+        return this._connectionId;
+    }
+
+    public get GroupId() {
+        return this._groupId;
+    }
+    
     public get IsConnectionStarted() {
         return this._isConnectionStarted;
     }

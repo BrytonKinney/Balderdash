@@ -55,6 +55,7 @@
                 this.gameSelected = true;
                 this.game.CurrentPlayer.setName(this.playerName);
                 this.game.Players.push(this.game.CurrentPlayer);
+                this.game.CurrentPlayer.setIsHost(false);
                 await this.game.joinGame(this.joinGameId);
             },
             async startGame(): Promise<void> {

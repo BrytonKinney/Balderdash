@@ -4,15 +4,17 @@
             <li v-for="player in players"
                 v-bind:key="player.id">
                 <template v-if="currentPlayer.isHost">
-                    <div>
+                    <div v-bind:class="{'current-player': player.id === currentPlayer.id}">
                         {{ player.name }}
                     </div>
-                    <div v-if="isCurrentPlayer(player.id)">
+                    <div v-if="player.id !== currentPlayer.id">
                         <button type="button">Kick</button>
                     </div>
                 </template>
                 <template v-else>
-                    {{ player.name }}
+                    <div v-bind:class="{'current-player': player.id === currentPlayer.id}">
+                        {{ player.name }}
+                    </div>
                 </template>
             </li>
         </ul>
@@ -31,13 +33,9 @@
         },
         data() {
             return {
-                expandedPlayerMenus: {} as PlayerMap
             };
         },
         methods: {
-            isCurrentPlayer(id: string): boolean {
-                return id === this.currentPlayer.id;
-            },
             kickPlayer(id: string): void {
                 this.$emit('kick-player', id);
             }
@@ -45,11 +43,14 @@
     });
 </script>
 <style lang="scss">
+    .player-list li {
+        padding-top: .5em;
+        padding-bottom: .5em;
+    }
+    .current-player {
+        font-style: italic;
+    }
     .player-list {
         list-style: none;
-    }
-
-    .player-list div {
-        cursor: pointer;
     }
 </style>

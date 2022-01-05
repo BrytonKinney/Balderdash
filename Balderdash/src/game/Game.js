@@ -14,14 +14,26 @@ class Game {
         this._players = new Array();
         this._currentPlayer = new Player("", "", true);
         this._gameConnection = new GameConnection();
+        this.registerEvents();
+    }
+    registerEvents() {
         this._gameConnection.OnGameStarted.on((data) => {
             if (data !== undefined) {
                 this._currentPlayer.setId(data.ConnectionId);
             }
         });
-        this._gameConnection.OnPlayerJoined.on((player) => {
-            if (player !== undefined)
-                this._players.push(player);
+        this._gameConnection.OnPlayerListUpdated.on((players) => {
+            if (players !== undefined) {
+                this._players.splice(0, this._players.length);
+                for (const player of players) {
+                    this._players.push(player);
+                }
+            }
+        });
+        this._gameConnection.OnGameJoined.on((data) => {
+            if (data !== undefined) {
+                this._currentPlayer.setId(data.playerId);
+            }
         });
     }
     async startGame() {

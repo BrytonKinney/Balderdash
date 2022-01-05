@@ -18,22 +18,26 @@ class Game {
         this._players = new Array<Player>();
         this._currentPlayer = new Player("", "", true);
         this._gameConnection = new GameConnection();
+        this.registerEvents();
+    }
+
+    private registerEvents(): void {
         this._gameConnection.OnGameStarted.on((data?: GameStartedEvent): void => {
             if (data !== undefined) {
                 this._currentPlayer.setId(data.ConnectionId);
             }
         });
-        this._gameConnection.OnPlayerJoined.on((player?: Player): void => {
-            if(player !== undefined)
-                this._players.push(player);
+        this._gameConnection.OnPlayerListUpdated.on((players?: Player[]): void => {
+            if (players !== undefined) {
+                this._players.splice(0, this._players.length);
+                for (const player of players) {
+                    this._players.push(player);
+                }
+            }
         });
         this._gameConnection.OnGameJoined.on((data?: GameJoinedResponse) => {
             if (data !== undefined) {
                 this._currentPlayer.setId(data.playerId);
-                this._players.splice(0, this._players.length);
-                for (const player of data.players) {
-                    this._players.push(player);
-                }
             }
         });
     }

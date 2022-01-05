@@ -3,7 +3,7 @@
         <PlayerList v-bind:players="players" 
 					v-bind:current-player="currentPlayer"/>
         <div id="gameWindow">
-            <div id="gameId">Game ID: {{ newGame.GameId }}</div>
+            <div id="gameId">Game ID: <input type="text" readonly v-model="newGame.GameId" /></div>
             <div id="gameActions"></div>
         </div>
     </div>
@@ -37,10 +37,10 @@
         flex-grow: 1;
     }
     div#gameWindow {
-        flex-grow: 3;
+        flex-grow: 5;
     }
-    div#gameId {
-        text-align: center;
+    div#gameId input {
+        width: 11.5%;
     }
 
 </style>

@@ -1,10 +1,10 @@
 class StartGameResponse {
-    gameId;
-    startedSuccessfully;
-    constructor() {
-        this.gameId = '';
-        this.startedSuccessfully = false;
-    }
+    gameId = "";
+    startedSuccessfully = false;
 }
-export { StartGameResponse };
+class GameJoinedResponse {
+    gameId = "";
+    playerId = "";
+}
+export { StartGameResponse, GameJoinedResponse };
 //# sourceMappingURL=Responses.js.map

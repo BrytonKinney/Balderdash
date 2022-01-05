@@ -13,6 +13,9 @@ class Player {
     setId(id) {
         this.id = id;
     }
+    setIsHost(isHost) {
+        this.isHost = isHost;
+    }
 }
 export { Player };
 //# sourceMappingURL=Player.js.map

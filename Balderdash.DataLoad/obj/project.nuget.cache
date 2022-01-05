@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "Pi27fyrtiCAmMMzh/mZEWh/1KXUYrO/2HOJPvP+G1z8XEhLGdHL2KFhnKEufRLGALbMePNfQ5/6Lt+ekY7oBgw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\bryto\\source\\repos\\Balderdash\\Balderdash.DataLoad\\Balderdash.DataLoad.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\bryto\\.nuget\\packages\\sqlite\\3.13.0\\sqlite.3.13.0.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,6 +1,6 @@
 class Player {
 
-    constructor(public id: string, public name: string, public readonly isHost: boolean) {
+    constructor(public id: string, public name: string, public isHost: boolean) {
     }
 
     public setName(name: string): void {
@@ -8,6 +8,9 @@ class Player {
     }
     public setId(id: string): void {
         this.id = id;
+    }
+    public setIsHost(isHost: boolean): void {
+        this.isHost = isHost;
     }
 }
 

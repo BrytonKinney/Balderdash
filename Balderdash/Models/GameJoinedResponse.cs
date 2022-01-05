@@ -10,6 +10,5 @@ namespace Balderdash.Models
     {
         public string GameId { get; set; }
         public string PlayerId { get; set; }
-        public IList<Player> Players { get; set; }
     }
 }
