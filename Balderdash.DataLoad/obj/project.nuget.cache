@@ -1,10 +1,17 @@
 {
   "version": 2,
-  "dgSpecHash": "Pi27fyrtiCAmMMzh/mZEWh/1KXUYrO/2HOJPvP+G1z8XEhLGdHL2KFhnKEufRLGALbMePNfQ5/6Lt+ekY7oBgw==",
+  "dgSpecHash": "6Oh7nJu3AeUdssfMQYXEbHAY5UmFuGi6Nw/vb0PLOLLqMPzNkcGcRkVCec0/8i8k54G4ptIfEUSgVsVqMmBxlA==",
   "success": true,
   "projectFilePath": "C:\\Users\\bryto\\source\\repos\\Balderdash\\Balderdash.DataLoad\\Balderdash.DataLoad.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\bryto\\.nuget\\packages\\sqlite\\3.13.0\\sqlite.3.13.0.nupkg.sha512"
+    "C:\\Users\\bryto\\.nuget\\packages\\microsoft.data.sqlite\\6.0.1\\microsoft.data.sqlite.6.0.1.nupkg.sha512",
+    "C:\\Users\\bryto\\.nuget\\packages\\microsoft.data.sqlite.core\\6.0.1\\microsoft.data.sqlite.core.6.0.1.nupkg.sha512",
+    "C:\\Users\\bryto\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.0.6\\sqlitepclraw.bundle_e_sqlite3.2.0.6.nupkg.sha512",
+    "C:\\Users\\bryto\\.nuget\\packages\\sqlitepclraw.core\\2.0.6\\sqlitepclraw.core.2.0.6.nupkg.sha512",
+    "C:\\Users\\bryto\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.0.6\\sqlitepclraw.lib.e_sqlite3.2.0.6.nupkg.sha512",
+    "C:\\Users\\bryto\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.0.6\\sqlitepclraw.provider.e_sqlite3.2.0.6.nupkg.sha512",
+    "C:\\Users\\bryto\\.nuget\\packages\\system.memory\\4.5.3\\system.memory.4.5.3.nupkg.sha512",
+    "C:\\Users\\bryto\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\5.0.13\\microsoft.netcore.app.host.win-x64.5.0.13.nupkg.sha512"
   ],
   "logs": []
 }

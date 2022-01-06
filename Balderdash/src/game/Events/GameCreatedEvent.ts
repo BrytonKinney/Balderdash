@@ -1,4 +1,4 @@
-﻿export class GameStartedEvent {
+﻿export class GameCreatedEvent {
     public readonly GameId: string;
     public readonly ConnectionId: string;
 

@@ -1,6 +1,6 @@
 import { Player } from "./Player";
 import { GameConnection } from "./GameConnection";
-import { GameStartedEvent } from "./Events/GameStartedEvent";
+import { GameCreatedEvent } from "./Events/GameCreatedEvent";
 import { GameJoinedResponse } from "./Responses";
 
 enum GameOption {
@@ -22,7 +22,7 @@ class Game {
     }
 
     private registerEvents(): void {
-        this._gameConnection.OnGameStarted.on((data?: GameStartedEvent): void => {
+        this._gameConnection.OnGameCreated.on((data?: GameCreatedEvent): void => {
             if (data !== undefined) {
                 this._currentPlayer.setId(data.ConnectionId);
             }

@@ -2,10 +2,10 @@
 import { Player } from "./Player";
 import { StartGameResponse, GameJoinedResponse } from "./Responses";
 import { GameEvent } from "./GameEvent";
-import { GameStartedEvent } from "./Events/GameStartedEvent";
+import { GameCreatedEvent } from "./Events/GameCreatedEvent";
 
 class GameConnection {
-    public readonly OnGameStarted: GameEvent<GameStartedEvent>;
+    public readonly OnGameCreated: GameEvent<GameCreatedEvent>;
     public readonly OnPlayerListUpdated: GameEvent<Player[]>;
     public readonly OnGameJoined: GameEvent<GameJoinedResponse>;
 
@@ -19,7 +19,7 @@ class GameConnection {
         this._connectionId = "";
         this._groupId = "";
         this._isConnectionStarted = false;
-        this.OnGameStarted = new GameEvent<GameStartedEvent>();
+        this.OnGameCreated = new GameEvent<GameCreatedEvent>();
         this.OnPlayerListUpdated = new GameEvent<Player[]>();
         this.OnGameJoined = new GameEvent<GameJoinedResponse>();
         this.registerEvents();
@@ -27,12 +27,12 @@ class GameConnection {
     }
 
     private registerEvents() : void {
-        this._connection.on("gameStarted", (response: StartGameResponse) => {
+        this._connection.on("gameCreated", (response: StartGameResponse) => {
             if (this._connection.connectionId != null) {
                 this._connectionId = this._connection.connectionId;
             }
             this._groupId = response.gameId;
-            this.OnGameStarted.trigger(new GameStartedEvent(this._groupId, this._connectionId));
+            this.OnGameCreated.trigger(new GameCreatedEvent(this._groupId, this._connectionId));
         });
         this._connection.on("playerListUpdated", (response: Player[]) => {
             this.OnPlayerListUpdated.trigger(response);
@@ -59,7 +59,7 @@ class GameConnection {
     }
 
     async startGame(currentPlayer: Player): Promise<void> {
-        return this._connection.send("startGame", currentPlayer);
+        return this._connection.send("createGame", currentPlayer);
     }
 
     async joinGame(gameId: string, player: Player): Promise<void> {

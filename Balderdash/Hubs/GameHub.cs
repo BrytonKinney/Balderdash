@@ -19,15 +19,20 @@ namespace Balderdash.Hubs
             _gameService = gameService;
         }
 
-        public async Task StartGame(Player playerOne)
+        public async Task CreateNewGame(Player playerOne)
         {
-            var newGame = _gameService.StartNewGame(Context.ConnectionId, playerOne);
+            var newGame = _gameService.CreateNewGame(Context.ConnectionId, playerOne);
             await Groups.AddToGroupAsync(Context.ConnectionId, newGame.GameId);
-            await Clients.Caller.SendAsync("gameStarted", new StartGameResponse()
+            await Clients.Caller.SendAsync("gameCreated", new StartGameResponse()
             {
                 GameId = newGame?.GameId,
                 StartedSuccessfully = newGame != null
             }, CancellationToken.None);
+        }
+
+        public async Task StartGame(string gameId)
+        {
+
         }
 
         public async Task JoinGame(string gameId, Player player)

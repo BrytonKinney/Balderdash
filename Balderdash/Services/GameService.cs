@@ -1,4 +1,5 @@
-﻿using Balderdash.Entities;
+﻿using Balderdash.DomainContext;
+using Balderdash.Entities;
 using Balderdash.Models;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -12,8 +13,14 @@ namespace Balderdash.Services
     public class GameService
     {
         private static readonly ConcurrentDictionary<Guid, Game> _currentGames = new ConcurrentDictionary<Guid, Game>();
+        private WordRepository _wordRepository;
 
-        public Game StartNewGame(string playerId, Player playerOne)
+        public GameService(WordRepository wordRepository)
+        {
+            _wordRepository = wordRepository;
+        }
+
+        public Game CreateNewGame(string playerId, Player playerOne)
         {
             var newGame = new Game();
             playerOne.SetId(playerId);
@@ -23,9 +30,20 @@ namespace Balderdash.Services
             return null;
         }
 
+        public Game StartGame(string gameId)
+        {
+            var currentGame = GetGameById(gameId);
+            if (currentGame == null)
+                return null;
+            currentGame.Start();
+
+            return currentGame;
+        }
+
         public Game JoinGame(string playerId, string gameId, Player player)
         {
-            if (!Guid.TryParse(gameId, out Guid gameGuid) || !_currentGames.TryGetValue(gameGuid, out Game currentGame))
+            var currentGame = GetGameById(gameId);
+            if (currentGame == null)
                 return null;
             player.SetId(playerId);
             currentGame.Players.Add(player);
@@ -47,6 +65,13 @@ namespace Balderdash.Services
                     _currentGames.TryRemove(gameKvp);
             }
             return result;
+        }
+
+        private Game GetGameById(string gameId)
+        {
+            if (!Guid.TryParse(gameId, out Guid gameGuid) || !_currentGames.TryGetValue(gameGuid, out Game currentGame))
+                return null;
+            return currentGame;
         }
     }
 }
