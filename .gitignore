@@ -6,3 +6,6 @@
 .vs/
 *.js.map
 /Balderdash/src/*.js
+.idea/*
+/Balderdash.DataLoad/bin/*
+/Balderdash.DataLoad/obj/*
