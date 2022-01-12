@@ -22,7 +22,7 @@ namespace Balderdash.DomainContext
                         var words = new List<GameWord>();
                         while (reader.Read())
                         {
-                            words.Add(new GameWord(reader.GetString(0), reader.GetString(1)));
+                            words.Add(new GameWord(reader.GetString(1), reader.GetString(2)));
                         }
                         return words;
                     }

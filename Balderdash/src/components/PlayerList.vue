@@ -1,5 +1,6 @@
 ﻿<template>
     <div id="playersList">
+        <h2>Players</h2>
         <ul class="player-list">
             <li v-for="player in players"
                 v-bind:key="player.id">
@@ -43,6 +44,13 @@
     });
 </script>
 <style lang="scss">
+    div#playersList {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+    .player-list {
+        padding: 0;
+    }
     .player-list li {
         padding-top: .5em;
         padding-bottom: .5em;

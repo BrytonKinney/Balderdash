@@ -7,7 +7,6 @@
             Word = word;
             Definition = definition;
         }
-
         public string Word { get; private set; }
         public string Definition { get; private set; }
     }

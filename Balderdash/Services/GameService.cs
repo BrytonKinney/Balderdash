@@ -1,5 +1,7 @@
 ﻿using Balderdash.DomainContext;
+using Balderdash.DomainContext.PersistedEntities;
 using Balderdash.Entities;
+using Balderdash.Hubs;
 using Balderdash.Models;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -13,10 +15,12 @@ namespace Balderdash.Services
     public class GameService
     {
         private static readonly ConcurrentDictionary<Guid, Game> _currentGames = new ConcurrentDictionary<Guid, Game>();
-        private WordRepository _wordRepository;
+        private readonly WordRepository _wordRepository;
+        private readonly IHubContext<GameHub, IGameHub> _gameHub;
 
-        public GameService(WordRepository wordRepository)
+        public GameService(IHubContext<GameHub, IGameHub> gameHub, WordRepository wordRepository)
         {
+            _gameHub = gameHub;
             _wordRepository = wordRepository;
         }
 
@@ -36,8 +40,24 @@ namespace Balderdash.Services
             if (currentGame == null)
                 return null;
             currentGame.Start();
-
             return currentGame;
+        }
+
+        public Game StartRound(string gameId)
+        {
+            var currentGame = GetGameById(gameId);
+            if (currentGame == null)
+                return null;
+            currentGame.StartNewRound();
+            return currentGame;
+        }
+
+        public async Task<GameWord> GetRandomWordAsync()
+        {
+            IEnumerable<GameWord> words = await _wordRepository.GetWords();
+            int wordCount = words.Count();
+            int randomIndex = new System.Random().Next(wordCount - 1);
+            return words.ElementAt(randomIndex);
         }
 
         public Game JoinGame(string playerId, string gameId, Player player)
@@ -67,7 +87,13 @@ namespace Balderdash.Services
             return result;
         }
 
-        private Game GetGameById(string gameId)
+        public Player GetGameHost(string gameId)
+        {
+            var currentGame = GetGameById(gameId);
+            return currentGame.Host;
+        }
+
+        public Game GetGameById(string gameId)
         {
             if (!Guid.TryParse(gameId, out Guid gameGuid) || !_currentGames.TryGetValue(gameGuid, out Game currentGame))
                 return null;

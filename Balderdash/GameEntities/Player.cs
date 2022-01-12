@@ -17,6 +17,32 @@ namespace Balderdash.Entities
         public string Name { get; private set; }
         public string Id { get; private set; }
         public bool IsHost { get; }
+        public string Word { get; private set; }
+        public string Definition { get; private set; }
+        public bool HasRealDefinition { get; private set; }
+
+        public void SetWord(string word)
+        {
+            Word = word;
+        }
+
+        public void AssignRealDefinition(string word, string definition)
+        {
+            HasRealDefinition = true;
+            Word = word;
+            Definition = definition;
+        }
+
+        public void ResetForNewRound()
+        {
+            HasRealDefinition = false;
+            Word = string.Empty;
+            Definition = string.Empty;
+        }
+        public void SetDefinition(string definition)
+        {
+            Definition = definition;
+        }
 
         public void SetId(string id)
         {

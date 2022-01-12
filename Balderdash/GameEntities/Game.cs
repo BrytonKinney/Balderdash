@@ -21,8 +21,27 @@ namespace Balderdash.Entities
         public IList<Player> Players { get; }
         public bool IsStarted { get; private set; }
         public GameWord CurrentWord { get; private set; }
+        public Player Host => Players.SingleOrDefault(p => p.IsHost);
+        public Round CurrentRound { get; private set; }
 
-        public void SetWord(GameWord word)
+        public void StartNewRound()
+        {
+            if (!IsStarted)
+                Start();
+            CurrentRound = new Round();
+            CurrentRound.SetRoundWord(CurrentWord);
+            CurrentRound.Start();
+            var nonHostPlayers = Players.Where(p => !p.IsHost);
+            int randomPlayerIndex = new System.Random().Next(nonHostPlayers.Count() - 1);
+            var assignedPlayer = nonHostPlayers.ElementAt(randomPlayerIndex);
+            assignedPlayer.AssignRealDefinition(CurrentWord.Word, CurrentWord.Definition);
+            foreach(var player in nonHostPlayers.Where(p => p.Id != assignedPlayer.Id))
+            {
+                player.SetWord(CurrentWord.Word);
+            }
+        }
+
+        public void SetCurrentWord(GameWord word)
         {
             CurrentWord = word;
         }

@@ -49,7 +49,7 @@
             joinOrStartGame(): void {
                 if (!this.validateName() || !this.game.CanStart)
                     return;
-                this.gameOptionSelection === GameOption.StartGame ? this.startGame() : this.joinGame();
+                this.gameOptionSelection === GameOption.StartGame ? this.createGame() : this.joinGame();
             },
             async joinGame(): Promise<void> {
                 this.gameSelected = true;
@@ -58,11 +58,11 @@
                 this.game.CurrentPlayer.setIsHost(false);
                 await this.game.joinGame(this.joinGameId);
             },
-            async startGame(): Promise<void> {
+            async createGame(): Promise<void> {
                 this.gameSelected = true;
                 this.game.CurrentPlayer.setName(this.playerName);
                 this.game.Players.push(this.game.CurrentPlayer);
-                await this.game.startGame();
+                await this.game.createGame();
             },
             validateName(): boolean {
                 const nameInput = this.$refs.name as HTMLElement;

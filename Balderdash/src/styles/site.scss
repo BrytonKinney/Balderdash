@@ -1,15 +1,15 @@
-﻿$ghost-white: #E8E9F3;
-$light-gray: #CECECE;
-$quick-silver: #A6A6A8;
-$raisin-black: #272635;
-$np-blue: #B1E5F2;
-$slate-gray: #6C8694;
-$dark-sky-blue: #8FB6C3;
+﻿@import './colors.scss';
 
+@mixin border {
+    border: 1px solid $raisin-black;
+}
 button {
     background-color: $light-gray;
     border: 1px solid $raisin-black;
     border-radius: 5px;
+}
+button.padded {
+    padding: 1rem;
 }
 button:hover {
     background-color: $quick-silver;
@@ -30,4 +30,7 @@ input.invalid {
 }
 html {
     background-color: $ghost-white;
+}
+.container {
+    display: flex;
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Balderdash.DomainContext;
 using Balderdash.Hubs;
 using Balderdash.Services;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +32,7 @@ namespace Balderdash
                 r.EnableDetailedErrors = true;
             });
             services.AddScoped<GameService>();
+            services.AddScoped<WordRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
