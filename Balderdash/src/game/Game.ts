@@ -1,8 +1,9 @@
-import { Player } from "./Player";
-import { GameConnection } from "./GameConnection";
 import { GameCreatedEvent } from "./Events/GameCreatedEvent";
+import { PlayerSubmittedVoteEvent } from "./Events/PlayerSubmittedVoteEvent";
+import { GameConnection } from "./GameConnection";
+import { GameWord, IGameWord } from "./GameWord";
+import { Player } from "./Player";
 import { GameJoinedResponse } from "./Responses";
-import { GameWord } from "./GameWord";
 
 enum GameOption {
     None = 0,
@@ -17,14 +18,16 @@ class Game {
     private _currentWord: GameWord;
     private _gameStarted: boolean;
     private _roundStarted: boolean;
+    private _allDefinitionsSubmitted: boolean;
 
     constructor() {
         this._players = new Array<Player>();
-        this._currentPlayer = new Player("", "", true, "", "", false);
+        this._currentPlayer = new Player("", "", true, "", "", false, false);
         this._gameConnection = new GameConnection();
         this._currentWord = new GameWord("", "");
         this._gameStarted = false;
         this._roundStarted = false;
+        this._allDefinitionsSubmitted = false;
         this.registerEvents();
     }
 
@@ -49,7 +52,7 @@ class Game {
                 this._roundStarted = data.isRoundStarted;
             }
         });
-        this._gameConnection.OnRandomWordReceived.on((data?: GameWord) => {
+        this._gameConnection.OnRandomWordReceived.on((data?: IGameWord) => {
             if (data !== undefined) {
                 this._currentWord.definition = data.definition;
                 this._currentWord.word = data.word;
@@ -64,6 +67,28 @@ class Game {
                 this._currentPlayer.setHasRealDefinition(player.hasRealDefinition);
                 this._currentPlayer.setWord(player.word);
                 this._roundStarted = true;
+            }
+        });
+        this._gameConnection.OnAllDefinitionsSubmitted.on((players?: Player[]) => {
+            if (players !== undefined) {
+                for (let player of this._players) {
+                    const newPlayerState = players.find(p => p.id === player.id);
+                    if (newPlayerState === undefined)
+                        continue;
+                    player.definition = newPlayerState.definition;
+                    player.id = newPlayerState.id;
+                    player.hasRealDefinition = newPlayerState.hasRealDefinition;
+                    player.isHost = newPlayerState.isHost;
+                    player.name = newPlayerState.name;
+                    player.word = newPlayerState.word;
+                }
+                this._allDefinitionsSubmitted = true;
+            }
+        });
+        this._gameConnection.OnPlayerSubmittedVote.on((event?: PlayerSubmittedVoteEvent) => {
+            if (event !== undefined) {
+                this._currentPlayer.setHasSubmittedVote(true);
+                console.log("hit");
             }
         });
     }
@@ -83,7 +108,16 @@ class Game {
     async startRound(): Promise<void> {
         await this._gameConnection.startRound(this.GameId);
     }
+    async submitDefinition(definition: string): Promise<void> {
+        await this._gameConnection.submitDefinition(this.GameId, definition);
+    }
+    async submitVote(vote: string): Promise<void> {
+        await this._gameConnection.submitVote(this.GameId, this._currentPlayer.id, vote);
+    }
 
+    get AllDefinitionsSubmitted() {
+        return this._allDefinitionsSubmitted;
+    }
     get CurrentWord() {
         return this._currentWord;
     }

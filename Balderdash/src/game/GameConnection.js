@@ -1,6 +1,7 @@
 import * as signalr from "@microsoft/signalr";
-import { GameEvent } from "./GameEvent";
 import { GameCreatedEvent } from "./Events/GameCreatedEvent";
+import { PlayerSubmittedVoteEvent } from "./Events/PlayerSubmittedVoteEvent";
+import { GameEvent } from "./GameEvent";
 class GameConnection {
     OnGameCreated;
     OnPlayerListUpdated;
@@ -8,6 +9,8 @@ class GameConnection {
     OnRandomWordReceived;
     OnGameStarted;
     OnRoundStarted;
+    OnAllDefinitionsSubmitted;
+    OnPlayerSubmittedVote;
     _connection;
     _isConnectionStarted;
     _connectionId;
@@ -23,6 +26,8 @@ class GameConnection {
         this.OnRandomWordReceived = new GameEvent();
         this.OnGameStarted = new GameEvent();
         this.OnRoundStarted = new GameEvent();
+        this.OnAllDefinitionsSubmitted = new GameEvent();
+        this.OnPlayerSubmittedVote = new GameEvent();
         this.registerEvents();
         this._connection.start().then(() => { return this._isConnectionStarted = true; });
     }
@@ -53,6 +58,12 @@ class GameConnection {
         this._connection.on("roundStarted", (player) => {
             this.OnRoundStarted.trigger(player);
         });
+        this._connection.on("allDefinitionsSubmitted", (players) => {
+            this.OnAllDefinitionsSubmitted.trigger(players);
+        });
+        this._connection.on("playerSubmittedVote", (player, definition) => {
+            this.OnPlayerSubmittedVote.trigger(new PlayerSubmittedVoteEvent(player, definition));
+        });
     }
     get ConnectionId() {
         return this._connectionId;
@@ -77,6 +88,12 @@ class GameConnection {
     }
     async startRound(gameId) {
         await this._connection.send("startRound", gameId);
+    }
+    async submitDefinition(gameId, definition) {
+        await this._connection.send("submitDefinition", gameId, definition);
+    }
+    async submitVote(gameId, playerId, definition) {
+        await this._connection.send("submitVote", gameId, playerId, definition);
     }
 }
 export { GameConnection };

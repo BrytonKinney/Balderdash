@@ -18,13 +18,47 @@
             <div v-if="gameStarted && !roundStarted && !isHost">
                 <p>Host is selecting a word...</p>
             </div>
-            <div class="game-word" v-else-if="gameStarted && roundStarted && hasRealDefinition">
+            <div class="game-word" v-else-if="!isHost && gameStarted && roundStarted && hasRealDefinition && !allDefinitionsSubmitted">
                 <p>You have the real definition.</p>
                 <h4>{{ currentPlayer.word }}</h4>
                 <p>{{ currentPlayer.definition }}</p>
             </div>
+            <div class="game-word" v-else-if="!isHost && gameStarted && roundStarted && !hasRealDefinition && !allDefinitionsSubmitted">
+                <p>You must enter a fake definition</p>
+                <h4>{{ currentPlayer.word }}</h4>
+                <div class="window-content">
+                    <input type="text" v-model="currentPlayer.definition" />
+                    <button type="button" v-on:click="submitDefinition">Submit definition</button>
+                </div>
+            </div>
+            <div class="game-word" v-else-if="gameStarted && roundStarted && allDefinitionsSubmitted">
+                <h3 v-if="!isHost">{{ currentPlayer.word }}</h3>
+                <h3 v-else>{{ currentWord.word }}</h3>
+                <div class="window-content" v-for="player in nonHostPlayers" v-bind:key="player.id">
+                    <template v-if="!isHost">
+                        <div class="vote-definition">
+                            <div class="word">
+                                <p>
+                                    {{ player.definition }}
+                                </p>
+                            </div>
+                            <div class="vote">
+                                <input type="checkbox" v-on:change="setSelectedVote(player.definition)" v-model="player.definition === selectedVote" v-bind:disabled="currentPlayer.hasSubmittedVote" />
+                            </div>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <strong>{{ player.name }}</strong> - {{ player.definition }}
+                    </template>
+                </div>
+                <div class="window-content">
+                    <button v-if="!currentPlayer.hasSubmittedVote" type="button" v-on:click="setCurrentPlayerVote(selectedVote)">
+                        Submit vote
+                    </button>
+                </div>
+            </div>
             <div class="game-window">
-                <div v-if="currentWord.word" class="game-word">
+                <div v-if="currentWord.word && isHost" class="game-word">
                     <h3>{{ currentWord.word }}</h3>
                     <div class="window-content">
                         <p>{{ currentWord.definition }}</p>
@@ -48,6 +82,9 @@
             newGame: Object as PropType<Game>
         },
         computed: {
+            nonHostPlayers(): Player[] {
+                return this.newGame.Players.filter(p => !p.isHost);
+            },
             isHost(): boolean {
                 return this.currentPlayer.isHost;
             },
@@ -59,16 +96,23 @@
             },
             hasRealDefinition(): boolean {
                 return this.currentPlayer.hasRealDefinition;
+            },
+            allDefinitionsSubmitted(): boolean {
+                return this.newGame.AllDefinitionsSubmitted;
             }
         },
-        data: function () {
+        data() {
             return {
                 players: this.newGame.Players,
                 currentPlayer: this.newGame.CurrentPlayer,
-                currentWord: this.newGame.CurrentWord
+                currentWord: this.newGame.CurrentWord,
+                selectedVote: "" as string
             };
         },
         methods: {
+            setSelectedVote(definition: string): void {
+                this.selectedVote = definition;
+            },
             async startGame(): Promise<void> {
                 await this.newGame.startGame();
             },
@@ -80,6 +124,12 @@
             },
             async startRound(): Promise<void> {
                 await this.newGame.startRound();
+            },
+            async submitDefinition(): Promise<void> {
+                await this.newGame.submitDefinition(this.currentPlayer.definition);
+            },
+            async setCurrentPlayerVote(vote: string): Promise<void> {
+                await this.newGame.submitVote(vote);
             }
         }
     });
@@ -132,5 +182,26 @@
 
     .game-word .window-content {
         margin-bottom: 1rem;
+        margin-top: 1rem;
+    }
+
+    .vote-definition {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .vote-definition div.word {
+        width: 25%;
+    }
+    @media screen and (min-width: 1080px) {
+        .vote-definition div.vote {
+            width: 5%;
+        }
+    }
+    @media screen and (max-width: 1079px) {
+        .vote-definition div.vote {
+            width: 15%;
+        }
     }
 </style>

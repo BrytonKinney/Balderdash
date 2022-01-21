@@ -52,6 +52,19 @@ namespace Balderdash.Services
             return currentGame;
         }
 
+        public async Task<bool> SubmitDefinition(string gameId, string playerId, string definition)
+        {
+            var currentGame = GetGameById(gameId);
+            bool successfullySubmitted = currentGame.AddPlayerSubmission(playerId, definition);
+            if (!successfullySubmitted)
+            {
+                return false;
+            }
+            if (currentGame.Players.Where(p => !p.IsHost && !p.HasRealDefinition).All(p => !string.IsNullOrEmpty(p.Definition)))
+                await _gameHub.Clients.Group(gameId).AllDefinitionsSubmitted(currentGame.Players);
+            return true;
+        }
+
         public async Task<GameWord> GetRandomWordAsync()
         {
             IEnumerable<GameWord> words = await _wordRepository.GetWords();
@@ -67,6 +80,16 @@ namespace Balderdash.Services
                 return null;
             player.SetId(playerId);
             currentGame.Players.Add(player);
+            return currentGame;
+        }
+
+        public Game PlayerSubmittedVote(string gameId, string playerId, string definition)
+        {
+            var currentGame = GetGameById(gameId);
+            if (currentGame == null)
+                return null;
+            currentGame.AddVoteToSubmission(definition);
+            currentGame.GetPlayerById(playerId).SetHasVoted(true);
             return currentGame;
         }
 

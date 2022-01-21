@@ -9,16 +9,18 @@ namespace Balderdash.Entities
     public class Game
     {
         private string _gameId;
-        
+
         public Game()
         {
             Players = new List<Player>();
+            PlayerSubmissions = new List<PlayerSubmission>();
             _gameId = Guid.NewGuid().ToString();
             IsStarted = false;
         }
 
         public string GameId => _gameId;
         public IList<Player> Players { get; }
+        public IList<PlayerSubmission> PlayerSubmissions { get; }
         public bool IsStarted { get; private set; }
         public GameWord CurrentWord { get; private set; }
         public Player Host => Players.SingleOrDefault(p => p.IsHost);
@@ -32,13 +34,31 @@ namespace Balderdash.Entities
             CurrentRound.SetRoundWord(CurrentWord);
             CurrentRound.Start();
             var nonHostPlayers = Players.Where(p => !p.IsHost);
+            foreach (Player player in nonHostPlayers)
+            {
+                player.ResetForNewRound();
+            }
             int randomPlayerIndex = new System.Random().Next(nonHostPlayers.Count() - 1);
             var assignedPlayer = nonHostPlayers.ElementAt(randomPlayerIndex);
             assignedPlayer.AssignRealDefinition(CurrentWord.Word, CurrentWord.Definition);
-            foreach(var player in nonHostPlayers.Where(p => p.Id != assignedPlayer.Id))
+            foreach (var player in nonHostPlayers.Where(p => p.Id != assignedPlayer.Id))
             {
                 player.SetWord(CurrentWord.Word);
             }
+        }
+
+        public bool AddPlayerSubmission(string playerId, string definition)
+        {
+            if (PlayerSubmissions.Any(ps => ps.Definition == definition))
+                return false;
+            PlayerSubmissions.Add(new PlayerSubmission(playerId, CurrentWord.Word, definition));
+            GetPlayerById(playerId).SetDefinition(definition);
+            return true;
+        }
+
+        public void AddVoteToSubmission(string definition)
+        {
+            PlayerSubmissions.FirstOrDefault(ps => string.Compare(ps.Definition.Trim(), definition.Trim(), StringComparison.OrdinalIgnoreCase) == 0)?.AddVote();
         }
 
         public void SetCurrentWord(GameWord word)
@@ -49,6 +69,11 @@ namespace Balderdash.Entities
         public void Start()
         {
             IsStarted = true;
+        }
+
+        public Player GetPlayerById(string playerId)
+        {
+            return Players.FirstOrDefault(p => p.Id == playerId);
         }
 
         public void Stop()

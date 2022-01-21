@@ -1,6 +1,6 @@
-import { Player } from "./Player";
 import { GameConnection } from "./GameConnection";
 import { GameWord } from "./GameWord";
+import { Player } from "./Player";
 var GameOption;
 (function (GameOption) {
     GameOption[GameOption["None"] = 0] = "None";
@@ -14,13 +14,15 @@ class Game {
     _currentWord;
     _gameStarted;
     _roundStarted;
+    _allDefinitionsSubmitted;
     constructor() {
         this._players = new Array();
-        this._currentPlayer = new Player("", "", true, "", "", false);
+        this._currentPlayer = new Player("", "", true, "", "", false, false);
         this._gameConnection = new GameConnection();
         this._currentWord = new GameWord("", "");
         this._gameStarted = false;
         this._roundStarted = false;
+        this._allDefinitionsSubmitted = false;
         this.registerEvents();
     }
     registerEvents() {
@@ -61,6 +63,27 @@ class Game {
                 this._roundStarted = true;
             }
         });
+        this._gameConnection.OnAllDefinitionsSubmitted.on((players) => {
+            if (players !== undefined) {
+                for (let player of this._players) {
+                    const newPlayerState = players.find(p => p.id === player.id);
+                    if (newPlayerState === undefined)
+                        continue;
+                    player.definition = newPlayerState.definition;
+                    player.id = newPlayerState.id;
+                    player.hasRealDefinition = newPlayerState.hasRealDefinition;
+                    player.isHost = newPlayerState.isHost;
+                    player.name = newPlayerState.name;
+                    player.word = newPlayerState.word;
+                }
+                this._allDefinitionsSubmitted = true;
+            }
+        });
+        this._gameConnection.OnPlayerSubmittedVote.on((event) => {
+            if (event !== undefined) {
+                this._currentPlayer.setHasRealDefinition(true);
+            }
+        });
     }
     async createGame() {
         await this._gameConnection.createGame(this._currentPlayer);
@@ -76,6 +99,15 @@ class Game {
     }
     async startRound() {
         await this._gameConnection.startRound(this.GameId);
+    }
+    async submitDefinition(definition) {
+        await this._gameConnection.submitDefinition(this.GameId, definition);
+    }
+    async submitVote(vote) {
+        await this._gameConnection.submitVote(this.GameId, this._currentPlayer.id, vote);
+    }
+    get AllDefinitionsSubmitted() {
+        return this._allDefinitionsSubmitted;
     }
     get CurrentWord() {
         return this._currentWord;

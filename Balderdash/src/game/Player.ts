@@ -5,7 +5,8 @@ class Player {
         public isHost: boolean,
         public word: string,
         public definition: string,
-        public hasRealDefinition: boolean) {
+        public hasRealDefinition: boolean,
+        public hasSubmittedVote: boolean) {
     }
 
     public setName(name: string): void {
@@ -24,6 +25,18 @@ class Player {
         this.definition = definition;
     }
     public setHasRealDefinition(hasRealDefinition: boolean): void {
+        this.hasRealDefinition = hasRealDefinition;
+    }
+    public setHasSubmittedVote(hasSubmittedVote: boolean): void {
+        this.hasSubmittedVote = hasSubmittedVote;
+    }
+
+    public update(id: string, name: string, isHost: boolean, word: string, definition: string, hasRealDefinition: boolean): void {
+        this.id = id;
+        this.name = name;
+        this.isHost = isHost;
+        this.word = word;
+        this.definition = definition;
         this.hasRealDefinition = hasRealDefinition;
     }
 }

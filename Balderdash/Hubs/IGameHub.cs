@@ -14,5 +14,9 @@ namespace Balderdash.Hubs
         Task RandomWord(GameWord randomWord);
         Task PlayerListUpdated(IList<Player> players);
         Task RoundStarted(Player player);
+        Task AllDefinitionsSubmitted(IList<Player> Players);
+        Task DefinitionAlreadyUsed();
+        Task PlayerSubmittedVote(Player player, string definition);
+        Task AllVotesSubmitted(IList<PlayerSubmission> submissions);
     }
 }

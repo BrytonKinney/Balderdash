@@ -20,6 +20,7 @@ namespace Balderdash.Entities
         public string Word { get; private set; }
         public string Definition { get; private set; }
         public bool HasRealDefinition { get; private set; }
+        public bool HasVoted { get; private set; }
 
         public void SetWord(string word)
         {
@@ -38,7 +39,14 @@ namespace Balderdash.Entities
             HasRealDefinition = false;
             Word = string.Empty;
             Definition = string.Empty;
+            HasVoted = false;
         }
+
+        public void SetHasVoted(bool hasVoted)
+        {
+            HasVoted = hasVoted;
+        }
+
         public void SetDefinition(string definition)
         {
             Definition = definition;

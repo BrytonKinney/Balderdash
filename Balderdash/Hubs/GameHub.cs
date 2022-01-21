@@ -30,6 +30,14 @@ namespace Balderdash.Hubs
             });
         }
 
+        public async Task SubmitVote(string gameId, string playerId, string definition)
+        {
+            var game = _gameService.PlayerSubmittedVote(gameId, playerId, definition);
+            await Clients.Caller.PlayerSubmittedVote(game.GetPlayerById(playerId), definition);
+            if (game.Players.All(p => p.HasVoted))
+                await Clients.Group(game.GameId).AllVotesSubmitted(game.PlayerSubmissions);
+        }
+
         public async Task StartGame(string gameId)
         {
             var game = _gameService.StartGame(gameId);
@@ -45,6 +53,12 @@ namespace Balderdash.Hubs
                 await Clients.Client(player.Id).RoundStarted(player);
             }
         }
+
+        public async Task SubmitDefinition(string gameId, string definition)
+        {
+            await _gameService.SubmitDefinition(gameId, Context.ConnectionId, definition);            
+        }
+
         public async Task SendRandomWordToHost(string gameId)
         {
             var randomWord = await _gameService.GetRandomWordAsync();
@@ -66,6 +80,11 @@ namespace Balderdash.Hubs
                 IsGameStarted = joinedGame.IsStarted,
                 IsRoundStarted = joinedGame.CurrentRound?.IsStarted ?? false
             });
+            if (joinedGame.CurrentRound?.IsStarted == true)
+            {
+                player.SetWord(joinedGame.CurrentWord.Word);
+                await Clients.Caller.RoundStarted(player);
+            }
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
