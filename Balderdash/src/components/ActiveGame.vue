@@ -11,9 +11,16 @@
             <div class="host-panel" v-if="isHost">
                 <h4>Host Actions</h4>
                 <div class="host-actions">
-                    <button class="padded" v-on:click="startGame" v-if="!gameStarted">Start Game</button>
+                    <button class="padded" v-on:click="startGame" v-if="canStartGame">Start Game</button>
                     <button class="padded" v-on:click="getNewWord" v-if="gameStarted">Get new random word</button>
+                    <p v-if="!gameStarted && !canStartGame">Waiting for more players...</p>
                 </div>
+            </div>
+            <div v-if="newGame.ConnectionState === 'CLOSED'">
+                You have been disconnected!
+            </div>
+            <div v-if="newGame.ConnectionState === 'RECONNECTING'">
+                Attempting to reconnect to the game...
             </div>
             <div v-if="gameStarted && !roundStarted && !isHost">
                 <p>Host is selecting a word...</p>
@@ -31,7 +38,7 @@
                     <button type="button" v-on:click="submitDefinition">Submit definition</button>
                 </div>
             </div>
-            <div class="game-word" v-else-if="gameStarted && roundStarted && allDefinitionsSubmitted">
+            <div class="game-word" v-else-if="gameStarted && roundStarted && allDefinitionsSubmitted && !votingComplete">
                 <h3 v-if="!isHost">{{ currentPlayer.word }}</h3>
                 <h3 v-else>{{ currentWord.word }}</h3>
                 <div class="window-content" v-for="player in nonHostPlayers" v-bind:key="player.id">
@@ -52,9 +59,17 @@
                     </template>
                 </div>
                 <div class="window-content">
-                    <button v-if="!currentPlayer.hasSubmittedVote" type="button" v-on:click="setCurrentPlayerVote(selectedVote)">
+                    <button v-if="!currentPlayer.hasSubmittedVote && !currentPlayer.isHost" type="button" v-on:click="setCurrentPlayerVote(selectedVote)">
                         Submit vote
                     </button>
+                </div>
+            </div>
+            <div class="game-word" v-else-if="gameStarted && roundStarted && allDefinitionsSubmitted && votingComplete">
+                <h3>Results</h3>
+                <div class="window-content">
+                    <div v-for="(submission, idx) in newGame.playerSubmissions" v-bind:key="idx">
+                        {{ getPlayerName(submission.submittedById) }}: {{ submission.definition }} - {{ submission.votes }} votes
+                    </div>
                 </div>
             </div>
             <div class="game-window">
@@ -73,6 +88,7 @@
     import { Game, Player } from "../game/Balderdash";
     import Vue, { PropType } from "vue";
     import PlayerList from "./PlayerList.vue";
+import { PlayerSubmission } from "../game/PlayerSubmission";
     export default Vue.extend({
         name: "ActiveGame",
         components: {
@@ -99,6 +115,18 @@
             },
             allDefinitionsSubmitted(): boolean {
                 return this.newGame.AllDefinitionsSubmitted;
+            },
+            canStartGame(): boolean {
+                return !this.gameStarted && this.newGame.Players.filter(p => !p.isHost).length > 1;
+            },
+            votingComplete(): boolean {
+                return this.newGame.VotingComplete;
+            },
+            orderedSubmissions(): PlayerSubmission[] {
+                let playerSubmissions = this.newGame.PlayerSubmissions;
+                return playerSubmissions.sort((p1, p2) => {
+                    return p2.votes - p1.votes;
+                });
             }
         },
         data() {
@@ -130,6 +158,12 @@
             },
             async setCurrentPlayerVote(vote: string): Promise<void> {
                 await this.newGame.submitVote(vote);
+            },
+            getPlayerName(id: string): string {
+                const player = this.players.find(p => p.id === id);
+                if (player !== undefined)
+                    return player.name;
+                return "";
             }
         }
     });

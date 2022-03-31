@@ -1,6 +1,6 @@
 class Player {
 
-    constructor(public id: string,
+    constructor(public id: string | null,
         public name: string,
         public isHost: boolean,
         public word: string,
@@ -12,7 +12,7 @@ class Player {
     public setName(name: string): void {
         this.name = name;
     }
-    public setId(id: string): void {
+    public setId(id: string | null): void {
         this.id = id;
     }
     public setIsHost(isHost: boolean): void {

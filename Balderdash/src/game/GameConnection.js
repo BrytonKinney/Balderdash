@@ -11,6 +11,9 @@ class GameConnection {
     OnRoundStarted;
     OnAllDefinitionsSubmitted;
     OnPlayerSubmittedVote;
+    OnAllVotesSubmitted;
+    OnRoundStopped;
+    OnConnectionStateChange;
     _connection;
     _isConnectionStarted;
     _connectionId;
@@ -28,6 +31,9 @@ class GameConnection {
         this.OnRoundStarted = new GameEvent();
         this.OnAllDefinitionsSubmitted = new GameEvent();
         this.OnPlayerSubmittedVote = new GameEvent();
+        this.OnAllVotesSubmitted = new GameEvent();
+        this.OnRoundStopped = new GameEvent();
+        this.OnConnectionStateChange = new GameEvent();
         this.registerEvents();
         this._connection.start().then(() => { return this._isConnectionStarted = true; });
     }
@@ -64,6 +70,15 @@ class GameConnection {
         this._connection.on("playerSubmittedVote", (player, definition) => {
             this.OnPlayerSubmittedVote.trigger(new PlayerSubmittedVoteEvent(player, definition));
         });
+        this._connection.on("allVotesSubmitted", (submissions) => {
+            this.OnAllVotesSubmitted.trigger(submissions);
+        });
+        this._connection.on("stopRound", () => {
+            this.OnRoundStopped.trigger();
+        });
+        this._connection.onclose(() => this.OnConnectionStateChange.trigger("CLOSED"));
+        this._connection.onreconnecting(() => this.OnConnectionStateChange.trigger("RECONNECTING"));
+        this._connection.onreconnected(() => this.OnConnectionStateChange.trigger("OPEN"));
     }
     get ConnectionId() {
         return this._connectionId;

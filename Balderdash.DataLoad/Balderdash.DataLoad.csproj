@@ -6,20 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="obscure_dict.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="obscure_dict.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="obscure_dict.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="words.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

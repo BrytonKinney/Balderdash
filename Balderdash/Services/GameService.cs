@@ -14,7 +14,7 @@ namespace Balderdash.Services
 {
     public class GameService
     {
-        private static readonly ConcurrentDictionary<Guid, Game> _currentGames = new ConcurrentDictionary<Guid, Game>();
+        private static readonly ConcurrentDictionary<Guid, Game> _currentGames = new();
         private readonly WordRepository _wordRepository;
         private readonly IHubContext<GameHub, IGameHub> _gameHub;
 
@@ -27,11 +27,8 @@ namespace Balderdash.Services
         public Game CreateNewGame(string playerId, Player playerOne)
         {
             var newGame = new Game();
-            playerOne.SetId(playerId);
-            newGame.Players.Add(playerOne);
-            if (_currentGames.TryAdd(Guid.Parse(newGame.GameId), newGame))
-                return newGame;
-            return null;
+            newGame.AddPlayer(playerId, playerOne);
+            return _currentGames.TryAdd(Guid.Parse(newGame.GameId), newGame) ? newGame : null;
         }
 
         public Game StartGame(string gameId)
@@ -52,6 +49,16 @@ namespace Balderdash.Services
             return currentGame;
         }
 
+        public Game StopRound(string gameId)
+        {
+            var currentGame = GetGameById(gameId);
+            if (currentGame == null)
+                return null;
+            currentGame.PlayerSubmissions.Clear();
+            foreach(var player in currentGame.Players)
+                player.ResetForNewRound();
+            return currentGame;
+        }
         public async Task<bool> SubmitDefinition(string gameId, string playerId, string definition)
         {
             var currentGame = GetGameById(gameId);
@@ -67,7 +74,7 @@ namespace Balderdash.Services
 
         public async Task<GameWord> GetRandomWordAsync()
         {
-            IEnumerable<GameWord> words = await _wordRepository.GetWords();
+            IEnumerable<GameWord> words = (await _wordRepository.GetWords()).ToList();
             int wordCount = words.Count();
             int randomIndex = new System.Random().Next(wordCount - 1);
             return words.ElementAt(randomIndex);
@@ -78,8 +85,7 @@ namespace Balderdash.Services
             var currentGame = GetGameById(gameId);
             if (currentGame == null)
                 return null;
-            player.SetId(playerId);
-            currentGame.Players.Add(player);
+            currentGame.AddPlayer(playerId, player);
             return currentGame;
         }
 

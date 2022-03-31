@@ -4,6 +4,7 @@ import { PlayerSubmittedVoteEvent } from "./Events/PlayerSubmittedVoteEvent";
 import { GameEvent } from "./GameEvent";
 import { GameWord, IGameWord } from "./GameWord";
 import { Player } from "./Player";
+import { PlayerSubmission } from "./PlayerSubmission";
 import { GameJoinedResponse, StartGameResponse } from "./Responses";
 
 class GameConnection {
@@ -15,10 +16,13 @@ class GameConnection {
     public readonly OnRoundStarted: GameEvent<Player>;
     public readonly OnAllDefinitionsSubmitted: GameEvent<Player[]>;
     public readonly OnPlayerSubmittedVote: GameEvent<PlayerSubmittedVoteEvent>;
+    public readonly OnAllVotesSubmitted: GameEvent<PlayerSubmission[]>;
+    public readonly OnRoundStopped: GameEvent<void>;
+    public readonly OnConnectionStateChange: GameEvent<string>;
 
     private _connection: signalr.HubConnection;
     private _isConnectionStarted: boolean;
-    private _connectionId: string;
+    private _connectionId: string | null;
     private _groupId: string;
 
     constructor() {
@@ -34,6 +38,9 @@ class GameConnection {
         this.OnRoundStarted = new GameEvent<Player>();
         this.OnAllDefinitionsSubmitted = new GameEvent<Player[]>();
         this.OnPlayerSubmittedVote = new GameEvent<PlayerSubmittedVoteEvent>();
+        this.OnAllVotesSubmitted = new GameEvent<PlayerSubmission[]>();
+        this.OnRoundStopped = new GameEvent<void>();
+        this.OnConnectionStateChange = new GameEvent<string>();
         this.registerEvents();
         this._connection.start().then(() => { return this._isConnectionStarted = true; });
     }
@@ -71,6 +78,16 @@ class GameConnection {
         this._connection.on("playerSubmittedVote", (player: Player, definition: string) => {
             this.OnPlayerSubmittedVote.trigger(new PlayerSubmittedVoteEvent(player, definition));
         });
+        this._connection.on("allVotesSubmitted", (submissions: PlayerSubmission[]) => {
+            this.OnAllVotesSubmitted.trigger(submissions);
+        });
+        this._connection.on("stopRound",
+            () => {
+                this.OnRoundStopped.trigger();
+            });
+        this._connection.onclose(() => this.OnConnectionStateChange.trigger("CLOSED"));
+        this._connection.onreconnecting(() => this.OnConnectionStateChange.trigger("RECONNECTING"));
+        this._connection.onreconnected(() => this.OnConnectionStateChange.trigger("OPEN"));
     }
 
     public get ConnectionId() {

@@ -1,6 +1,9 @@
 ﻿<template>
     <div id="app">
         <div class="game-options" v-if="!gameSelected">
+            <div v-if="game.ConnectionState === 'RECONNECTING'">
+                Attempting to reconnect to the game...
+            </div>
             <div class="game-options">
                 <button class="primary" type="button" v-on:click="setGameOptionSelection(GameOption.JoinGame)">Join a game</button>
                 <button class="primary" type="button" v-on:click="setGameOptionSelection(GameOption.StartGame)">Start new game</button>

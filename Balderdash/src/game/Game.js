@@ -8,66 +8,72 @@ var GameOption;
     GameOption[GameOption["StartGame"] = 2] = "StartGame";
 })(GameOption || (GameOption = {}));
 class Game {
-    _players;
-    _currentPlayer;
-    _gameConnection;
-    _currentWord;
-    _gameStarted;
-    _roundStarted;
-    _allDefinitionsSubmitted;
+    players;
+    currentPlayer;
+    gameConnection;
+    currentWord;
+    gameStarted;
+    roundStarted;
+    allDefinitionsSubmitted;
+    playerSubmissions;
+    votingComplete;
+    connectionState;
     constructor() {
-        this._players = new Array();
-        this._currentPlayer = new Player("", "", true, "", "", false, false);
-        this._gameConnection = new GameConnection();
-        this._currentWord = new GameWord("", "");
-        this._gameStarted = false;
-        this._roundStarted = false;
-        this._allDefinitionsSubmitted = false;
+        this.players = new Array();
+        this.currentPlayer = new Player("", "", true, "", "", false, false);
+        this.gameConnection = new GameConnection();
+        this.currentWord = new GameWord("", "");
+        this.gameStarted = false;
+        this.roundStarted = false;
+        this.allDefinitionsSubmitted = false;
+        this.votingComplete = false;
+        this.connectionState = "";
+        this.playerSubmissions = new Array();
         this.registerEvents();
     }
     registerEvents() {
-        this._gameConnection.OnGameCreated.on((data) => {
+        this.gameConnection.OnGameCreated.on((data) => {
             if (data !== undefined) {
-                this._currentPlayer.setId(data.ConnectionId);
+                this.currentPlayer.setId(data.ConnectionId);
             }
         });
-        this._gameConnection.OnPlayerListUpdated.on((players) => {
+        this.gameConnection.OnPlayerListUpdated.on((players) => {
             if (players !== undefined) {
-                this._players.splice(0, this._players.length);
+                this.players.splice(0, this.players.length);
                 for (const player of players) {
-                    this._players.push(player);
+                    this.players.push(player);
                 }
             }
         });
-        this._gameConnection.OnGameJoined.on((data) => {
+        this.gameConnection.OnGameJoined.on((data) => {
             if (data !== undefined) {
-                this._currentPlayer.setId(data.playerId);
-                this._gameStarted = data.isGameStarted;
-                this._roundStarted = data.isRoundStarted;
+                this.currentPlayer.setId(data.playerId);
+                this.gameStarted = data.isGameStarted;
+                this.roundStarted = data.isRoundStarted;
             }
         });
-        this._gameConnection.OnRandomWordReceived.on((data) => {
+        this.gameConnection.OnRandomWordReceived.on((data) => {
             if (data !== undefined) {
-                this._currentWord.definition = data.definition;
-                this._currentWord.word = data.word;
+                this.currentWord.definition = data.definition;
+                this.currentWord.word = data.word;
             }
         });
-        this._gameConnection.OnGameStarted.on(() => {
-            this._gameStarted = true;
+        this.gameConnection.OnGameStarted.on(() => {
+            this.gameStarted = true;
         });
-        this._gameConnection.OnRoundStarted.on((player) => {
+        this.gameConnection.OnRoundStarted.on((player) => {
             if (player !== undefined) {
-                this._currentPlayer.setDefinition(player.definition);
-                this._currentPlayer.setHasRealDefinition(player.hasRealDefinition);
-                this._currentPlayer.setWord(player.word);
-                this._roundStarted = true;
+                this.currentPlayer.setDefinition(player.definition);
+                this.currentPlayer.setHasRealDefinition(player.hasRealDefinition);
+                this.currentPlayer.setWord(player.word);
+                this.roundStarted = true;
             }
         });
-        this._gameConnection.OnAllDefinitionsSubmitted.on((players) => {
+        this.gameConnection.OnAllDefinitionsSubmitted.on((players) => {
             if (players !== undefined) {
-                for (let player of this._players) {
+                for (let player of this.players) {
                     const newPlayerState = players.find(p => p.id === player.id);
-                    if (newPlayerState === undefined)
+                    if (newPlayerState === undefined || newPlayerState === null)
                         continue;
                     player.definition = newPlayerState.definition;
                     player.id = newPlayerState.id;
@@ -76,59 +82,90 @@ class Game {
                     player.name = newPlayerState.name;
                     player.word = newPlayerState.word;
                 }
-                this._allDefinitionsSubmitted = true;
+                this.allDefinitionsSubmitted = true;
             }
         });
-        this._gameConnection.OnPlayerSubmittedVote.on((event) => {
+        this.gameConnection.OnPlayerSubmittedVote.on((event) => {
             if (event !== undefined) {
-                this._currentPlayer.setHasRealDefinition(true);
+                this.currentPlayer.setHasSubmittedVote(true);
+            }
+        });
+        this.gameConnection.OnAllVotesSubmitted.on((event) => {
+            if (event !== undefined) {
+                this.playerSubmissions = event;
+                this.votingComplete = true;
+            }
+        });
+        this.gameConnection.OnRoundStopped.on(() => {
+            this.roundStarted = false;
+            this.votingComplete = false;
+            this.allDefinitionsSubmitted = false;
+            this.currentPlayer.setHasSubmittedVote(false);
+            for (let player of this.players) {
+                player.setHasSubmittedVote(false);
+            }
+            this.playerSubmissions.splice(0, this.playerSubmissions.length);
+        });
+        this.gameConnection.OnConnectionStateChange.on((state) => {
+            if (state !== undefined) {
+                this.connectionState = state;
             }
         });
     }
     async createGame() {
-        await this._gameConnection.createGame(this._currentPlayer);
+        await this.gameConnection.createGame(this.currentPlayer);
     }
     async startGame() {
-        await this._gameConnection.startGame();
+        await this.gameConnection.startGame();
     }
     async joinGame(gameId) {
-        await this._gameConnection.joinGame(gameId, this._currentPlayer);
+        await this.gameConnection.joinGame(gameId, this.currentPlayer);
     }
     async getNewWord() {
-        await this._gameConnection.getRandomWord();
+        await this.gameConnection.getRandomWord();
     }
     async startRound() {
-        await this._gameConnection.startRound(this.GameId);
+        await this.gameConnection.startRound(this.GameId);
     }
     async submitDefinition(definition) {
-        await this._gameConnection.submitDefinition(this.GameId, definition);
+        await this.gameConnection.submitDefinition(this.GameId, definition);
     }
     async submitVote(vote) {
-        await this._gameConnection.submitVote(this.GameId, this._currentPlayer.id, vote);
+        if (this.currentPlayer.id != null)
+            await this.gameConnection.submitVote(this.GameId, this.currentPlayer.id, vote);
     }
     get AllDefinitionsSubmitted() {
-        return this._allDefinitionsSubmitted;
+        return this.allDefinitionsSubmitted;
     }
     get CurrentWord() {
-        return this._currentWord;
+        return this.currentWord;
     }
     get GameId() {
-        return this._gameConnection.GroupId;
+        return this.gameConnection.GroupId;
     }
     get CanStart() {
-        return this._gameConnection.IsConnectionStarted;
+        return this.gameConnection.IsConnectionStarted;
     }
     get Players() {
-        return this._players;
+        return this.players;
     }
     get CurrentPlayer() {
-        return this._currentPlayer;
+        return this.currentPlayer;
     }
     get GameStarted() {
-        return this._gameStarted;
+        return this.gameStarted;
     }
     get RoundStarted() {
-        return this._roundStarted;
+        return this.roundStarted;
+    }
+    get PlayerSubmissions() {
+        return this.playerSubmissions;
+    }
+    get VotingComplete() {
+        return this.votingComplete;
+    }
+    get ConnectionState() {
+        return this.connectionState;
     }
 }
 export { Game, GameOption };

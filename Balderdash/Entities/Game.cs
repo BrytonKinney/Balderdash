@@ -30,10 +30,12 @@ namespace Balderdash.Entities
         {
             if (!IsStarted)
                 Start();
+            var nonHostPlayers = Players.Where(p => !p.IsHost).ToList();
+            if (!nonHostPlayers.Any())
+                return;
             CurrentRound = new Round();
             CurrentRound.SetRoundWord(CurrentWord);
             CurrentRound.Start();
-            var nonHostPlayers = Players.Where(p => !p.IsHost);
             foreach (Player player in nonHostPlayers)
             {
                 player.ResetForNewRound();
@@ -41,16 +43,21 @@ namespace Balderdash.Entities
             int randomPlayerIndex = new System.Random().Next(nonHostPlayers.Count() - 1);
             var assignedPlayer = nonHostPlayers.ElementAt(randomPlayerIndex);
             assignedPlayer.AssignRealDefinition(CurrentWord.Word, CurrentWord.Definition);
+            PlayerSubmissions.Add(new PlayerSubmission(assignedPlayer.Id, CurrentWord.Word, CurrentWord.Definition));
             foreach (var player in nonHostPlayers.Where(p => p.Id != assignedPlayer.Id))
             {
                 player.SetWord(CurrentWord.Word);
             }
         }
 
+        public void AddPlayer(string playerId, Player player)
+        {
+            player.SetId(playerId);
+            Players.Add(player);
+        }
+
         public bool AddPlayerSubmission(string playerId, string definition)
         {
-            if (PlayerSubmissions.Any(ps => ps.Definition == definition))
-                return false;
             PlayerSubmissions.Add(new PlayerSubmission(playerId, CurrentWord.Word, definition));
             GetPlayerById(playerId).SetDefinition(definition);
             return true;

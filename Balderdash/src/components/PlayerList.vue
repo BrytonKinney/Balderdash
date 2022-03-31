@@ -6,7 +6,7 @@
                 v-bind:key="player.id">
                 <template v-if="currentPlayer.isHost">
                     <div v-bind:class="{'current-player': player.id === currentPlayer.id}">
-                        {{ player.name }}
+                        {{ player.name }} - {{ player.points }} points
                     </div>
                     <div v-if="player.id !== currentPlayer.id">
                         <button type="button">Kick</button>
@@ -14,7 +14,7 @@
                 </template>
                 <template v-else>
                     <div v-bind:class="{'current-player': player.id === currentPlayer.id}">
-                        {{ player.name }}
+                        {{ player.name }} - {{ player.points }} points
                     </div>
                 </template>
             </li>

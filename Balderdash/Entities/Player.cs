@@ -12,6 +12,7 @@ namespace Balderdash.Entities
             Id = id;
             Name = name;
             IsHost = isHost;
+            Points = 0;
         }
 
         public string Name { get; private set; }
@@ -21,7 +22,7 @@ namespace Balderdash.Entities
         public string Definition { get; private set; }
         public bool HasRealDefinition { get; private set; }
         public bool HasVoted { get; private set; }
-
+        public int Points { get; private set; }
         public void SetWord(string word)
         {
             Word = word;
@@ -55,6 +56,11 @@ namespace Balderdash.Entities
         public void SetId(string id)
         {
             Id = id;
+        }
+
+        public void AddPoint()
+        {
+            Points++;
         }
     }
 }

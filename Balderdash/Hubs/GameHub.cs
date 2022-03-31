@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Balderdash.Hubs
 {
     public class GameHub : Hub<IGameHub>
     {
-        private GameService _gameService;
+        private readonly GameService _gameService;
 
         public GameHub(GameService gameService)
         {
@@ -34,15 +35,35 @@ namespace Balderdash.Hubs
         {
             var game = _gameService.PlayerSubmittedVote(gameId, playerId, definition);
             await Clients.Caller.PlayerSubmittedVote(game.GetPlayerById(playerId), definition);
-            if (game.Players.All(p => p.HasVoted))
-                await Clients.Group(game.GameId).AllVotesSubmitted(game.PlayerSubmissions);
+            if (game.Players.Where(p => !p.IsHost).All(p => p.HasVoted))
+            {
+                await SendGroup(game.GameId).AllVotesSubmitted(game.PlayerSubmissions);
+                var mostVotes = game.PlayerSubmissions.OrderByDescending(p => p.Votes);
+                var firstPlace = mostVotes.First();
+                if (mostVotes.Count(p => p.Votes == firstPlace.Votes) > 1)
+                {
+                    foreach (var player in mostVotes)
+                    {
+                        AddPlayerPoint(game, player.SubmittedById);
+                    }
+                }
+                else
+                {
+                    AddPlayerPoint(game, firstPlace.SubmittedById);
+                }
+                await Clients.Group(game.GameId).PlayerListUpdated(game.Players);
+                await Task.Delay(TimeSpan.FromSeconds(5));
+                _gameService.StopRound(game.GameId);
+                await Clients.Group(game.GameId).StopRound();
+                await Clients.Group(game.GameId).PlayerListUpdated(game.Players);
+            }
         }
 
         public async Task StartGame(string gameId)
         {
             var game = _gameService.StartGame(gameId);
             await SendRandomWordToHost(game.GameId);
-            await Clients.Group(gameId).GameStarted();
+            await SendGroup(gameId).GameStarted();
         }
 
         public async Task StartRound(string gameId)
@@ -50,7 +71,7 @@ namespace Balderdash.Hubs
             var game = _gameService.StartRound(gameId);
             foreach(Player player in game.Players)
             {
-                await Clients.Client(player.Id).RoundStarted(player);
+                await SendPlayer(player.Id).RoundStarted(player);
             }
         }
 
@@ -65,12 +86,17 @@ namespace Balderdash.Hubs
             var host = _gameService.GetGameHost(gameId);
             _gameService.GetGameById(gameId).SetCurrentWord(randomWord);
             if (host != null)
-                await Clients.Client(host.Id).RandomWord(randomWord);
+                await SendPlayer(host.Id).RandomWord(randomWord);
         }
 
         public async Task JoinGame(string gameId, Player player)
         {
             var joinedGame = _gameService.JoinGame(Context.ConnectionId, gameId, player);
+            if (joinedGame == null)
+            {
+                await Clients.Caller.GameDoesNotExist();
+                return;
+            }
             await Groups.AddToGroupAsync(Context.ConnectionId, joinedGame.GameId);
             await Clients.Group(joinedGame.GameId).PlayerListUpdated(joinedGame.Players);
             await Clients.Caller.GameJoined(new GameJoinedResponse()
@@ -87,14 +113,30 @@ namespace Balderdash.Hubs
             }
         }
 
+        public async Task AddPlayerPoint(Game game, string playerId)
+        {
+            var player = game.GetPlayerById(playerId);
+            player.AddPoint();
+        }
+
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             Game game = _gameService.HandleDisconnect(Context.ConnectionId);
             if (game == null)
                 return;
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, game.GameId, CancellationToken.None);
-            await Clients.Group(game.GameId).PlayerListUpdated(game.Players);
+            await SendGroup(game.GameId).PlayerListUpdated(game.Players);
             await base.OnDisconnectedAsync(exception);
+        }
+
+        private IGameHub SendPlayer(string id)
+        {
+            return Clients.Client(id);
+        }
+
+        private IGameHub SendGroup(string groupName)
+        {
+            return Clients.Group(groupName);
         }
     }
 }
