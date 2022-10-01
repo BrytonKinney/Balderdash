@@ -49,6 +49,10 @@ namespace Balderdash.Entities
                 player.SetWord(CurrentWord.Word);
             }
         }
+        public void RemovePlayer(string playerId)
+        {
+            Players.Remove(GetPlayerById(playerId));
+        }
 
         public void AddPlayer(string playerId, Player player)
         {

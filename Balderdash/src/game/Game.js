@@ -111,6 +111,11 @@ class Game {
                 this.connectionState = state;
             }
         });
+        this.gameConnection.OnPlayerKicked.on(() => {
+        });
+    }
+    async kickPlayer(playerId) {
+        await this.gameConnection.kickPlayer(playerId);
     }
     async createGame() {
         await this.gameConnection.createGame(this.currentPlayer);

@@ -1,7 +1,8 @@
 ﻿<template>
     <div class="active-game container">
         <PlayerList v-bind:players="players"
-                    v-bind:current-player="currentPlayer" />
+                    v-bind:current-player="currentPlayer"
+                    @kick-player="kickPlayer"/>
         <div id="gameWindow" class="container">
             <div id="gameId">
                 Game ID: <input type="text" readonly
@@ -50,7 +51,7 @@
                                 </p>
                             </div>
                             <div class="vote">
-                                <input type="checkbox" v-on:change="setSelectedVote(player.definition)" v-model="player.definition === selectedVote" v-bind:disabled="currentPlayer.hasSubmittedVote" />
+                                <input type="checkbox" v-on:change="setSelectedVote(player.definition)" v-model="player.definition === selectedVote" v-bind:disabled="currentPlayer.hasSubmittedVote || currentPlayer.hasRealDefinition" />
                             </div>
                         </div>
                     </template>
@@ -59,7 +60,7 @@
                     </template>
                 </div>
                 <div class="window-content">
-                    <button v-if="!currentPlayer.hasSubmittedVote && !currentPlayer.isHost" type="button" v-on:click="setCurrentPlayerVote(selectedVote)">
+                    <button v-if="!currentPlayer.hasSubmittedVote && !currentPlayer.isHost && !currentPlayer.hasRealDefinition" type="button" v-on:click="setCurrentPlayerVote(selectedVote)">
                         Submit vote
                     </button>
                 </div>
@@ -117,7 +118,7 @@ import { PlayerSubmission } from "../game/PlayerSubmission";
                 return this.newGame.AllDefinitionsSubmitted;
             },
             canStartGame(): boolean {
-                return !this.gameStarted && this.newGame.Players.filter(p => !p.isHost).length > 1;
+                return !this.gameStarted && this.newGame.Players.filter(p => !p.isHost).length > 2;
             },
             votingComplete(): boolean {
                 return this.newGame.VotingComplete;
@@ -138,6 +139,9 @@ import { PlayerSubmission } from "../game/PlayerSubmission";
             };
         },
         methods: {
+            async kickPlayer(playerId: string) : Promise<void> {
+                await this.newGame.kickPlayer(playerId);
+            },
             setSelectedVote(definition: string): void {
                 this.selectedVote = definition;
             },

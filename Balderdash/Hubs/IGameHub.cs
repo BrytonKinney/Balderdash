@@ -20,5 +20,6 @@ namespace Balderdash.Hubs
         Task AllVotesSubmitted(IList<PlayerSubmission> submissions);
         Task GameDoesNotExist();
         Task StopRound();
+        Task PlayerKicked();
     }
 }

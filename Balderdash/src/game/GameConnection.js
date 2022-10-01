@@ -14,6 +14,7 @@ class GameConnection {
     OnAllVotesSubmitted;
     OnRoundStopped;
     OnConnectionStateChange;
+    OnPlayerKicked;
     _connection;
     _isConnectionStarted;
     _connectionId;
@@ -34,6 +35,7 @@ class GameConnection {
         this.OnAllVotesSubmitted = new GameEvent();
         this.OnRoundStopped = new GameEvent();
         this.OnConnectionStateChange = new GameEvent();
+        this.OnPlayerKicked = new GameEvent();
         this.registerEvents();
         this._connection.start().then(() => { return this._isConnectionStarted = true; });
     }
@@ -76,6 +78,10 @@ class GameConnection {
         this._connection.on("stopRound", () => {
             this.OnRoundStopped.trigger();
         });
+        this._connection.on("playerKicked", () => {
+            this.OnPlayerKicked.trigger();
+            this._connection.stop();
+        });
         this._connection.onclose(() => this.OnConnectionStateChange.trigger("CLOSED"));
         this._connection.onreconnecting(() => this.OnConnectionStateChange.trigger("RECONNECTING"));
         this._connection.onreconnected(() => this.OnConnectionStateChange.trigger("OPEN"));
@@ -88,6 +94,9 @@ class GameConnection {
     }
     get IsConnectionStarted() {
         return this._isConnectionStarted;
+    }
+    async kickPlayer(playerId) {
+        await this._connection.send("kickPlayer", playerId, this.GroupId);
     }
     async getRandomWord() {
         await this._connection.send("sendRandomWordToHost", this.GroupId);

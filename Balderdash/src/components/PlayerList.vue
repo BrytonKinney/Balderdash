@@ -9,7 +9,7 @@
                         {{ player.name }} - {{ player.points }} points
                     </div>
                     <div v-if="player.id !== currentPlayer.id">
-                        <button type="button">Kick</button>
+                        <button type="button" @click="kickPlayer(player.id)">Kick</button>
                     </div>
                 </template>
                 <template v-else>

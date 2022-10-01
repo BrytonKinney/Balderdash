@@ -5,6 +5,7 @@ import { GameWord, IGameWord } from "./GameWord";
 import { Player } from "./Player";
 import { PlayerSubmission } from "./PlayerSubmission";
 import { GameJoinedResponse } from "./Responses";
+import { GameEvent } from "./GameEvent";
 
 enum GameOption {
     None = 0,
@@ -24,9 +25,11 @@ class Game {
     private votingComplete: boolean;
     private connectionState: string;
 
+    public readonly OnPlayerKicked: GameEvent<void>;
+
     constructor() {
         this.players = new Array<Player>();
-        this.currentPlayer = new Player("", "", true, "", "", false, false);
+        this.currentPlayer = new Player("", "", true, "", "", false, false, false);
         this.gameConnection = new GameConnection();
         this.currentWord = new GameWord("", "");
         this.gameStarted = false;
@@ -35,6 +38,7 @@ class Game {
         this.votingComplete = false;
         this.connectionState = "";
         this.playerSubmissions = new Array<PlayerSubmission>();
+        this.OnPlayerKicked = new GameEvent<void>();
         this.registerEvents();
     }
 
@@ -116,10 +120,19 @@ class Game {
         this.gameConnection.OnConnectionStateChange.on((state?: string) => {
             if (state !== undefined) {
                 this.connectionState = state;
+                if (this.connectionState === "CLOSED" && !this.currentPlayer.wasKicked) {
+                    this.gameConnection.joinGame(this.GameId, this.currentPlayer);
+                }
             }
         });
+        this.gameConnection.OnPlayerKicked.on(() => {
+            this.currentPlayer.setWasKicked(true);
+            this.OnPlayerKicked.trigger();
+        });
     }
-
+    async kickPlayer(playerId: string): Promise<void> {
+        await this.gameConnection.kickPlayer(playerId);
+    }
     async createGame() : Promise<void> {
         await this.gameConnection.createGame(this.currentPlayer);
     }

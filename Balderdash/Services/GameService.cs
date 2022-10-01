@@ -24,6 +24,15 @@ namespace Balderdash.Services
             _wordRepository = wordRepository;
         }
 
+        public Game KickPlayer(string playerId, string gameId)
+        {
+            var currentGame = GetGameById(gameId);
+            if (currentGame == null)
+                return null;
+            currentGame.RemovePlayer(playerId);
+            return currentGame;
+        }
+
         public Game CreateNewGame(string playerId, Player playerOne)
         {
             var newGame = new Game();

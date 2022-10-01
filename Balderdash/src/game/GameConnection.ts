@@ -19,6 +19,7 @@ class GameConnection {
     public readonly OnAllVotesSubmitted: GameEvent<PlayerSubmission[]>;
     public readonly OnRoundStopped: GameEvent<void>;
     public readonly OnConnectionStateChange: GameEvent<string>;
+    public readonly OnPlayerKicked: GameEvent<void>;
 
     private _connection: signalr.HubConnection;
     private _isConnectionStarted: boolean;
@@ -41,6 +42,7 @@ class GameConnection {
         this.OnAllVotesSubmitted = new GameEvent<PlayerSubmission[]>();
         this.OnRoundStopped = new GameEvent<void>();
         this.OnConnectionStateChange = new GameEvent<string>();
+        this.OnPlayerKicked = new GameEvent<void>();
         this.registerEvents();
         this._connection.start().then(() => { return this._isConnectionStarted = true; });
     }
@@ -81,10 +83,13 @@ class GameConnection {
         this._connection.on("allVotesSubmitted", (submissions: PlayerSubmission[]) => {
             this.OnAllVotesSubmitted.trigger(submissions);
         });
-        this._connection.on("stopRound",
-            () => {
-                this.OnRoundStopped.trigger();
-            });
+        this._connection.on("stopRound", () => {
+            this.OnRoundStopped.trigger();
+        });
+        this._connection.on("playerKicked", () => {
+            this.OnPlayerKicked.trigger();
+            this._connection.stop();
+        });
         this._connection.onclose(() => this.OnConnectionStateChange.trigger("CLOSED"));
         this._connection.onreconnecting(() => this.OnConnectionStateChange.trigger("RECONNECTING"));
         this._connection.onreconnected(() => this.OnConnectionStateChange.trigger("OPEN"));
@@ -101,7 +106,9 @@ class GameConnection {
     public get IsConnectionStarted() {
         return this._isConnectionStarted;
     }
-
+    async kickPlayer(playerId: string): Promise<void> {
+        await this._connection.send("kickPlayer", playerId, this.GroupId);
+    }
     async getRandomWord(): Promise<void> {
         await this._connection.send("sendRandomWordToHost", this.GroupId);
     }

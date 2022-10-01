@@ -45,6 +45,11 @@
                 gameSelected: false
             };
         },
+        mounted() {
+            this.game.OnPlayerKicked.on(() => {
+                this.gameSelected = false;
+            });
+        },
         methods: {
             setGameOptionSelection(gameOption: GameOption): void {
                 this.gameOptionSelection = gameOption;
