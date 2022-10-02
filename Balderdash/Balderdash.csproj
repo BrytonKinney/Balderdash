@@ -31,8 +31,8 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
-    <Target Name="NpmRunBuild" BeforeTargets="BeforeBuild">
+    <!-- <Target Name="NpmRunBuild" BeforeTargets="BeforeBuild">
       <Exec Command="npm run build" />
-    </Target>
+    </Target> -->
 
 </Project>
