@@ -1,6 +1,7 @@
 import { GameConnection } from "./GameConnection";
 import { GameWord } from "./GameWord";
 import { Player } from "./Player";
+import { GameEvent } from "./GameEvent";
 var GameOption;
 (function (GameOption) {
     GameOption[GameOption["None"] = 0] = "None";
@@ -18,9 +19,10 @@ class Game {
     playerSubmissions;
     votingComplete;
     connectionState;
+    OnPlayerKicked;
     constructor() {
         this.players = new Array();
-        this.currentPlayer = new Player("", "", true, "", "", false, false);
+        this.currentPlayer = new Player("", "", true, "", "", false, false, false);
         this.gameConnection = new GameConnection();
         this.currentWord = new GameWord("", "");
         this.gameStarted = false;
@@ -29,6 +31,7 @@ class Game {
         this.votingComplete = false;
         this.connectionState = "";
         this.playerSubmissions = new Array();
+        this.OnPlayerKicked = new GameEvent();
         this.registerEvents();
     }
     registerEvents() {
@@ -109,9 +112,14 @@ class Game {
         this.gameConnection.OnConnectionStateChange.on((state) => {
             if (state !== undefined) {
                 this.connectionState = state;
+                if (this.connectionState === "CLOSED" && !this.currentPlayer.wasKicked) {
+                    this.gameConnection.joinGame(this.GameId, this.currentPlayer);
+                }
             }
         });
         this.gameConnection.OnPlayerKicked.on(() => {
+            this.currentPlayer.setWasKicked(true);
+            this.OnPlayerKicked.trigger();
         });
     }
     async kickPlayer(playerId) {

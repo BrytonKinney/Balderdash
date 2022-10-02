@@ -6,7 +6,8 @@ class Player {
     definition;
     hasRealDefinition;
     hasSubmittedVote;
-    constructor(id, name, isHost, word, definition, hasRealDefinition, hasSubmittedVote) {
+    wasKicked;
+    constructor(id, name, isHost, word, definition, hasRealDefinition, hasSubmittedVote, wasKicked) {
         this.id = id;
         this.name = name;
         this.isHost = isHost;
@@ -14,6 +15,7 @@ class Player {
         this.definition = definition;
         this.hasRealDefinition = hasRealDefinition;
         this.hasSubmittedVote = hasSubmittedVote;
+        this.wasKicked = wasKicked;
     }
     setName(name) {
         this.name = name;
@@ -36,13 +38,17 @@ class Player {
     setHasSubmittedVote(hasSubmittedVote) {
         this.hasSubmittedVote = hasSubmittedVote;
     }
-    update(id, name, isHost, word, definition, hasRealDefinition) {
+    setWasKicked(wasKicked) {
+        this.wasKicked = wasKicked;
+    }
+    update(id, name, isHost, word, definition, hasRealDefinition, wasKicked) {
         this.id = id;
         this.name = name;
         this.isHost = isHost;
         this.word = word;
         this.definition = definition;
         this.hasRealDefinition = hasRealDefinition;
+        this.wasKicked = wasKicked;
     }
 }
 export { Player };
